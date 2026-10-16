@@ -286,9 +286,11 @@ interface UniverseProfileProps {
     children?: React.ReactNode;
     /** 본인 미리보기 — 공유 버튼 등 방문자용 도구를 그리지 않는다 */
     preview?: boolean;
+    /** 수정 시작·끝을 알린다 — 좁은 화면에서 수정하는 동안 공개 설정 패널을 숨기는 데 쓴다 */
+    onEditingChange?: (editing: boolean) => void;
 }
 
-export function UniverseProfile({ isOwner = true, publicData, children, preview = false }: UniverseProfileProps) {
+export function UniverseProfile({ isOwner = true, publicData, children, preview = false, onEditingChange }: UniverseProfileProps) {
     const { user, isStaff, updateProfile } = useAuth();
 
     /* ── 표시용 프로필 (소유자=user, 공개=publicData) ── */
@@ -329,6 +331,7 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
 
     /* ── 편집 상태 (소유자 전용) ── */
     const [editing, setEditing] = useState(false);
+    useEffect(() => { onEditingChange?.(editing); }, [editing, onEditingChange]);
     const [bioExpanded, setBioExpanded] = useState(false);
     const [editForm, setEditForm] = useState({
         name: '', phone: '', company: '', bio: '',
@@ -604,6 +607,7 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
     const badakProfile = serviceProfiles.find(sp => sp.siteId === 'badak');
 
     const isPublic = profile.profileVisibility !== 'private';
+    const NameTag = isOwner ? 'h2' : 'h1';
 
 
     return (
@@ -615,7 +619,7 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
             <div className="rounded-2xl border tn-border tn-surface overflow-hidden">
 
                 {/* ── 머리: 사진 · 이름 · 주소 (배너·그라데이션 없음) ── */}
-                <div className="px-8 pt-8 flex items-start gap-5">
+                <div className="px-5 sm:px-8 pt-6 sm:pt-8 flex items-start gap-4 sm:gap-5">
                     <div className="relative group/avatar shrink-0">
                         {(pendingAvatar?.previewUrl || profile.avatarUrl) ? (
                             <Image
@@ -653,7 +657,8 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
                     </div>
 
                     <div className="flex-1 min-w-0 pt-2">
-                        <h1 className="text-xl font-bold tn-text truncate">{profile.name}</h1>
+                        {/* 좁은 화면에서 '수정' 버튼에 밀려 이름이 잘리지 않게 줄바꿈. 공개 화면에선 이름이 페이지 제목(h1), 마이 페이지에선 위에 제목이 따로 있어 h2 */}
+                        <NameTag className="text-lg sm:text-xl font-bold tn-text break-words">{profile.name}</NameTag>
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                             {profile.handle && <p className="text-xs tn-text-sub">@{profile.handle}</p>}
                             {isOwner && isStaff && <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border tn-border tn-text-sub">Staff</span>}
@@ -686,7 +691,7 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
                             </button>
                         )}
                         {isOwner && editing && (
-                            <>
+                            <div className="hidden sm:flex items-center gap-2">
                                 <button onClick={saveEditing}
                                     className="text-xs px-3 py-1.5 rounded-lg tn-btn-primary flex items-center gap-1.5 cursor-pointer">
                                     <Check className="h-3 w-3" /> 저장
@@ -695,14 +700,14 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
                                     className="text-xs tn-text-sub border tn-border px-3 py-1.5 rounded-lg cursor-pointer">
                                     취소
                                 </button>
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>
-                {isOwner && saveError && <p role="alert" className="px-8 pt-3 text-xs text-red-500">{saveError}</p>}
+                {isOwner && saveError && <p role="alert" className="hidden sm:block px-8 pt-3 text-xs text-red-500">{saveError}</p>}
 
                 {/* ── 상세 정보 영역 ── */}
-                <div className="px-8 py-5">
+                <div className={`px-5 sm:px-8 py-5 ${editing ? "pb-24 sm:pb-5" : ""}`}>
                 {editing ? (
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -920,7 +925,7 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
 
                 {/* ── HeRo 유형 ── */}
                 {heroProfile && (isOwner || (profile?.privacySettings?.hero === true)) && (
-                    <div className="px-8 py-5 border-t tn-border">
+                    <div className="px-5 sm:px-8 py-5 border-t tn-border">
                         <h2 className="text-xs font-semibold tn-text mb-4 flex items-center gap-2">
                             <Users className="h-3.5 w-3.5 tn-text-sub" /> HeRo 영웅 유형
                         </h2>
@@ -951,7 +956,7 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
 
                 {/* ── Badak 활동 ── */}
                 {badakActivity && (isOwner || (profile?.privacySettings?.badak === true)) && (badakActivity.ledGroups.length > 0 || badakActivity.joinedGroups.length > 0) && (
-                    <div className="px-8 py-5 border-t tn-border">
+                    <div className="px-5 sm:px-8 py-5 border-t tn-border">
                         <h2 className="text-xs font-semibold tn-text mb-4 flex items-center gap-2">
                             <Briefcase className="h-3.5 w-3.5 tn-text-sub" /> Badak 활동
                         </h2>
@@ -1023,7 +1028,7 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
                         return acc;
                     }, {});
                     return (
-                        <div className="px-8 py-5 border-t tn-border">
+                        <div className="px-5 sm:px-8 py-5 border-t tn-border">
                             <h2 className="text-xs font-semibold tn-text mb-4 flex items-center gap-2">
                                 <Sparkles className="h-3.5 w-3.5 tn-text-sub" /> 서비스 권한
                             </h2>
@@ -1058,7 +1063,7 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
 
                 {/* ── 직원 정보 ── */}
                 {isOwner && isStaff && (
-                    <div className="px-8 py-5 border-t tn-border">
+                    <div className="px-5 sm:px-8 py-5 border-t tn-border">
                         <h2 className="text-xs font-semibold tn-text mb-4 flex items-center gap-2">
                             <Shield className="h-3.5 w-3.5" /> 직원 정보
                         </h2>
@@ -1086,7 +1091,7 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
                 <div className="rounded-2xl border tn-border tn-surface overflow-hidden">
                     <button
                         onClick={() => setSitesOpen(o => !o)}
-                        className="w-full flex items-center justify-between px-6 py-4 hover:opacity-80 transition-opacity cursor-pointer">
+                        className="w-full flex items-center justify-between px-5 sm:px-6 py-4 hover:opacity-80 transition-opacity cursor-pointer">
                         <span className="text-xs font-semibold tn-text flex items-center gap-2">
                             <Globe className="h-3.5 w-3.5 tn-text-sub" />
                             유니버스 서비스
@@ -1097,7 +1102,7 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
                             : <ChevronDown className="h-4 w-4 tn-text-sub" />}
                     </button>
                     {sitesOpen && (
-                        <div className="px-6 pb-6 border-t tn-border">
+                        <div className="px-5 sm:px-6 pb-6 border-t tn-border">
                             <p className="text-[11px] tn-text-sub mt-4 mb-4">가입한 계정으로 모든 서비스를 이용할 수 있습니다.</p>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {sortedSites.map(s => (
@@ -1112,6 +1117,22 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
                             </div>
                         </div>
                     )}
+                </div>
+            )}
+            {/* 좁은 화면: 긴 수정 양식을 내려가도 저장·취소가 보이게 아래 고정 */}
+            {isOwner && editing && (
+                <div className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t tn-border tn-surface px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+                    {saveError && <p role="alert" className="mb-2 text-xs text-red-500">{saveError}</p>}
+                    <div className="flex gap-2">
+                        <button onClick={() => setEditing(false)}
+                            className="flex-1 text-sm tn-text-sub border tn-border py-2.5 rounded-lg cursor-pointer">
+                            취소
+                        </button>
+                        <button onClick={saveEditing}
+                            className="flex-[2] text-sm py-2.5 rounded-lg tn-btn-primary flex items-center justify-center gap-1.5 cursor-pointer">
+                            <Check className="h-4 w-4" /> 저장
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

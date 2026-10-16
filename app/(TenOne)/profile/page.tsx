@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { UniverseProfile } from "@/components/UniverseProfile";
@@ -17,6 +17,7 @@ import Link from "next/link";
  */
 export default function ProfilePage() {
     const { user, isAuthenticated, isLoading } = useAuth();
+    const [editing, setEditing] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -41,7 +42,7 @@ export default function ProfilePage() {
 
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
                 <div className="space-y-5 min-w-0">
-                    <UniverseProfile>
+                    <UniverseProfile onEditingChange={setEditing}>
                         {user && (
                             <ProfileComments
                                 targetMemberId={user.id}
@@ -53,7 +54,8 @@ export default function ProfilePage() {
                     {UC_PUBLIC && <UCBalanceCard />}
                 </div>
                 {/* 넓은 화면: 오른쪽에 따라 내려오는 패널 · 모바일: 프로필 아래 */}
-                <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
+                {/* 좁은 화면에서 프로필을 고치는 동안은 숨긴다 — 수정 양식 아래에 설정이 이어지면 저장 전 헷갈린다 */}
+                <div className={`lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto ${editing ? "hidden lg:block" : ""}`}>
                     <ProfileVisibilityRail />
                 </div>
             </div>
