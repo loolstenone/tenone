@@ -1738,6 +1738,7 @@ grep -rn 'TODO\|FIXME' src | wc -l
 
 - 한국어 UI/주석 사용
 - **브랜드 표기는 변형하지 않는다** — `Ten:One™`·`Ten:One™ Universe`는 브랜드 요소: ™ 생략·`TEN:ONE` 대문자·CSS `uppercase` 적용 금지 (2026-10-08 사용자 지시). 각 브랜드명도 공식 표기 그대로 (RooK·MADLeague·HeRo 등)
+- **긴 줄표(—) 금지** — 화면 문구·메타 제목·게시글·리포트·회원 글·AI 생성 문장 어디에도 쓰지 않고 하이픈(` - `)을 쓴다 (2026-10-15·10-16 사용자 지시, DB 일괄 수정 원본 `backup.emdash_20261016`). 코드 주석은 해당 없음
 - 컴포넌트: PascalCase 파일명
 - 타입 정의는 반드시 `types/` 디렉토리에
 - Context 패턴: `lib/{feature}-context.tsx` + `lib/{feature}-data.ts`
