@@ -1087,8 +1087,8 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
 
 ```
 사진 · 이름 · 이메일            ← 이름은 메뉴 안에서만 (바에는 사진만)
-마이 페이지                      ← 이 사이트의 나: profilePath (/{brand}/my, MyProfileCard + 브랜드 활동). 이름은 '마이 페이지'로 고정 — TenOne은 /profile(화면 제목도 '마이 페이지')이라 아래 줄 없이 한 줄
-Ten:One 프로필 · 계정           ← /profile (공통 프로필 + 공개 설정·주소·공유 + 보안·탈퇴) — 모든 도메인에서 열림. '내 공개 프로필' 항목은 두지 않는다 (2026-10-16 — 둘로 나뉘어 의미가 헷갈렸다)
+마이 페이지                      ← 이 사이트의 나: profilePath (/{brand}/my · TenOne /my, MyProfileCard + 브랜드 활동). 이름 '마이 페이지' 고정
+계정 관리                        ← /profile (화면 제목도 '계정 관리', Google 계정에 해당. account.tenone.biz 이전 계획 docs/Account_Subdomain_Plan.md) (공통 프로필 + 공개 설정·주소·공유 + 보안·탈퇴) — 모든 도메인에서 열림. '내 공개 프로필' 항목은 두지 않는다 (2026-10-16 — 둘로 나뉘어 의미가 헷갈렸다)
 이용 중인 다른 서비스 ›          ← member_brand_joins 기준 (현재 사이트 제외) — 원칙 7: 바가 아니라 메뉴 안에만
 인트라                           ← 직원만 (member_roles → canAccessIntra)
 로그아웃                         ← 모바일 시트에만 (데스크톱은 바에 텍스트)

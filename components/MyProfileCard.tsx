@@ -24,7 +24,7 @@ interface MyProfileCardProps {
     children?: React.ReactNode;
     /** 카드 테마 — 기본 dark (21개 브랜드 호환). light 컨텍스트(마이버스 앱 셸)에선 "light" */
     theme?: "light" | "dark";
-    /** Ten:One 프로필·계정 링크. null = 숨김. 기본 /profile (모든 도메인 공용 경로) */
+    /** 계정 관리(Ten:One 계정) 링크. null = 숨김. 기본 /profile (모든 도메인 공용 경로) */
     universeProfileHref?: string | null;
 }
 
@@ -35,7 +35,7 @@ interface MyProfileCardProps {
  * - 아바타 (이미지 or 이니셜)
  * - 이름, 이메일, 연락처, 소속
  * - 사이트별 역할 뱃지
- * - Ten:One 프로필·계정 링크 (/profile)
+ * - 계정 관리 링크 (/profile)
  * - children: 사이트별 프로필 추가 정보 (동아리, 직무 등)
  */
 export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark", universeProfileHref }: MyProfileCardProps) {
@@ -86,7 +86,7 @@ export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark"
 
     const initials = user.name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || '?';
 
-    // Ten:One 프로필·계정 링크 — null이면 숨김. /profile은 모든 도메인에서 열린다 (공용 경로)
+    // 계정 관리 링크 — null이면 숨김. /profile은 모든 도메인에서 열린다 (공용 경로)
     const upHref = universeProfileHref === null ? null : universeProfileHref ?? "/profile";
 
     return (
@@ -143,12 +143,12 @@ export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark"
                     </div>
                 )}
 
-                {/* Ten:One 프로필·계정 링크 (null이면 숨김) — 이름·사진·소개 수정과 공개 설정은 계정 하나에서 */}
+                {/* 계정 관리 링크 (null이면 숨김) — 이름·사진·소개 수정과 공개 설정은 계정 하나에서 */}
                 {upHref && (
                     <Link href={upHref} className={universeLinkCls}>
                         <Globe className={universeIconCls} />
                         <div className="flex-1">
-                            <p className={universePrimaryCls}>Ten:One 프로필 · 계정</p>
+                            <p className={universePrimaryCls}>계정 관리</p>
                             <p className={universeSecondaryCls}>이름·사진·소개 수정 · 공개 설정 — 모든 서비스 공통</p>
                         </div>
                         <ChevronRight className={universeChevronCls} />

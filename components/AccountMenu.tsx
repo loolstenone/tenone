@@ -5,7 +5,7 @@
  *
  * 정의: "나에 관한 곳으로 가는 목록". 아바타 하나가 두 층을 대표한다
  *   ① 이 사이트의 나   — 마이페이지 (브랜드 활동·특화 정보, MyProfileCard)
- *   ② Ten:One 계정     — Ten:One 프로필·계정(/profile: 공통 프로필·공개 설정·보안·탈퇴)
+ *   ② Ten:One 계정     — 계정 관리(/profile: 공통 프로필·공개 설정·보안·탈퇴)
  *   그리고 이용 중인 다른 서비스(member_brand_joins) · 인트라(직원만)
  *
  * - 바(데스크톱)에서는 드롭다운, 모바일에서는 아래에서 올라오는 시트
@@ -94,10 +94,10 @@ export function AccountMenu({ profilePath, siteId, mode = "dropdown", placement 
             </div>
 
             <div className={section}>
-                {/* 이름은 '마이 페이지'로 고정 (2026-10-16 사용자 지시). TenOne처럼 마이 페이지가 곧 /profile이면 한 줄만 */}
+                {/* 이름 고정 (2026-10-16 사용자 지시): 이 사이트의 나 = '마이 페이지', Ten:One 계정 = '계정 관리' (Google 계정처럼) */}
                 {profilePath && <Link href={profilePath} onClick={close} className={row}>마이 페이지</Link>}
                 {/* 공개 프로필은 따로 두지 않는다 — 내용 수정·공개 여부·주소·공유를 한 화면에서 (2026-10-16) */}
-                {profilePath !== "/profile" && <Link href="/profile" onClick={close} className={row}>Ten:One 프로필 · 계정</Link>}
+                {profilePath !== "/profile" && <Link href="/profile" onClick={close} className={row}>계정 관리</Link>}
             </div>
 
             {services && services.length > 0 && (
