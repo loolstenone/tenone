@@ -49,16 +49,22 @@ export function ProfileComments({ targetMemberId, targetHandle, isOwner = false 
 
     const loadComments = useCallback(async () => {
         const supabase = createClient();
-        const { data } = await supabase
-            .from('profile_comments')
-            .select(`
-                id, body, is_hidden, created_at,
-                author:author_member_id (id, name, handle, avatar_url)
-            `)
-            .eq('target_member_id', targetMemberId)
-            .order('created_at', { ascending: false });
+        // 작성자는 members를 직접 조인하지 않는다 — members RLS(본인·직원만)에 막혀 남이 보면 "탈퇴한 사용자"가 된다.
+        // 이름·사진만 돌려주는 profile_comment_authors (sql/profile-comments-authors.sql)
+        const [{ data }, { data: authors }] = await Promise.all([
+            supabase
+                .from('profile_comments')
+                .select('id, body, is_hidden, created_at')
+                .eq('target_member_id', targetMemberId)
+                .order('created_at', { ascending: false }),
+            supabase.rpc('profile_comment_authors', { p_target: targetMemberId }),
+        ]);
+        const byComment = new Map<string, Comment['author']>(
+            ((authors || []) as { comment_id: string; author_id: string; name: string; handle: string | null; avatar_url: string | null }[])
+                .map(a => [a.comment_id, { id: a.author_id, name: a.name, handle: a.handle ?? undefined, avatar_url: a.avatar_url ?? undefined }]),
+        );
 
-        setComments((data || []) as Comment[]);
+        setComments((data || []).map(c => ({ ...c, author: byComment.get(c.id) ?? null })) as Comment[]);
         setLoading(false);
     }, [targetMemberId]);
 
