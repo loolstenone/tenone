@@ -1,6 +1,24 @@
 import { MetadataRoute } from 'next';
+import { headers } from 'next/headers';
+import { brandSitemap, getSiteSeoSettings, ownedByBrandDomain, resolveHost } from '@/lib/site-seo';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+/**
+ * 도메인별 사이트맵 (2026-10-16) — 브랜드 도메인은 그 브랜드 공개 페이지·글 (lib/site-seo.ts),
+ * tenone.biz는 아래 목록에서 자기 공식 도메인이 있는 브랜드 경로를 뺀 것. 스테이징·비공개·공식 아닌 주소는 빈 목록.
+ */
+export const revalidate = 3600;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+    const site = resolveHost((await headers()).get('host') ?? 'www.tenone.biz');
+    if (site.siteId !== 'tenone') {
+        const entries = await brandSitemap(site, await getSiteSeoSettings(site.siteId));
+        return entries.map(e => ({ url: e.url, lastModified: e.lastModified ? new Date(e.lastModified) : undefined, priority: e.priority }));
+    }
+    if (!site.indexable) return [];
+    return tenoneSitemap().filter(e => !ownedByBrandDomain(new URL(e.url).pathname));
+}
+
+function tenoneSitemap(): MetadataRoute.Sitemap {
     const baseUrl = 'https://www.tenone.biz';
     const now = new Date();
 

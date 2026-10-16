@@ -289,6 +289,16 @@ docs/              # 설계 문서
 | EvoSchool | — | evschool.tenone.biz | /evschool | evschool |
 | NamingFactory | — | namingfactory.tenone.biz | /namingfactory | namingfactory |
 
+### 검색 노출 — robots.txt · sitemap.xml · llms.txt (2026-10-16)
+
+- **도메인마다 그 사이트 것을 만든다** — `lib/site-seo.ts` (`app/robots.txt/route.ts` · `app/sitemap.ts` · `app/llms.txt/route.ts`). 옛 `public/robots.txt`(전 도메인 공용)는 삭제
+- 사이트맵 = 사이트 메뉴 레지스트리(`lib/brand-site-menus.ts`)의 공개 페이지 + 공개 게시판 글 (+ MADLeague 동아리·MADzine). 메뉴를 바꾸면 사이트맵도 따라온다. 회원 전용 경로는 `PRIVATE_PATHS`
+- 막는 경우 (전체 Disallow·빈 사이트맵): 외부 서버 운영 중 브랜드(`hosting: 'external'`) · 공식 주소가 아닌 진입로(스테이징·apex) · `is_open=false` · localhost
+- tenone.biz 사이트맵 = TenOne + **공식 도메인이 없는 브랜드 경로**만 (공식 도메인 브랜드는 각자 사이트맵)
+- 인트라 › 사이트 설정 › **검색 노출·인공지능 최적화** (`components/intra/SiteSeoPanel.tsx`, `/api/intra/sites/seo`) = `ums_sites.sitemap_exclude`·`robots_extra`·`llms_txt`·`json_ld` + 현황(공식 주소·사이트맵 주소 수·막힌 이유)
+- 구조화 데이터: 브랜드 레이아웃에 `<SiteJsonLd siteId="…" />` 한 줄 (현재 MADLeague)
+- ❌ `public/robots.txt`·`public/sitemap.xml` 정적 파일 (전 도메인이 같은 걸 내보낸다) ❌ 사이트맵에 경로 손으로 추가 (메뉴 레지스트리·`EXTRA_PATHS`)
+
 ### 사이트 메타데이터 아키텍처
 
 ```

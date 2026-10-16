@@ -9,9 +9,10 @@ import { getDomainsBySiteId } from "@/lib/domain-registry";
 import {
     Globe, ExternalLink, Search, Settings,
     LayoutGrid, Check, Loader2, AlertCircle, Image as ImageIcon, Link2, Crown,
-    Upload, Sparkles, X,
+    Upload, X,
 } from "lucide-react";
 import { PageHeader } from "@/components/intra/IntraUI";
+import { SiteSeoPanel } from "@/components/intra/SiteSeoPanel";
 import clsx from "clsx";
 
 type DomainEntry = { domain: string; type: 'independent' | 'subdomain' | 'path' | 'vercel'; status: 'connected' | 'external' };
@@ -48,7 +49,6 @@ export default function SitesListPage() {
     const [editFavicon, setEditFavicon] = useState("");
     const [editOgImage, setEditOgImage] = useState("");
     const [uploading, setUploading] = useState<Record<string, boolean>>({});
-    const [editAi, setEditAi] = useState({ llms: "", robotsTxt: "", structuredData: "" });
 
     useEffect(() => {
         (async () => {
@@ -428,37 +428,6 @@ export default function SitesListPage() {
                             </div>
                         </div>
 
-                        {/* 인공지능 최적화 */}
-                        <div className="bg-white border border-neutral-100 p-5 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xs font-semibold text-neutral-700 flex items-center gap-1.5">
-                                    <Sparkles className="h-3.5 w-3.5 text-neutral-400" /> 인공지능 최적화
-                                </h3>
-                                <span className="text-[10px] text-neutral-400">AI 검색엔진 노출 설정</span>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-medium text-neutral-500 uppercase block mb-1.5">llms.txt</label>
-                                <textarea value={editAi.llms} onChange={e => setEditAi(p => ({ ...p, llms: e.target.value }))}
-                                    rows={4} placeholder="# 사이트명&#10;> 사이트 설명&#10;&#10;## 주요 페이지&#10;- [페이지명](URL): 설명"
-                                    className="w-full border border-neutral-200 px-3 py-2 text-xs font-mono focus:border-neutral-400 focus:outline-none bg-white resize-y" />
-                                <p className="text-[10px] text-neutral-400 mt-1">AI가 사이트를 이해하는 데 사용하는 구조화된 설명 파일</p>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-medium text-neutral-500 uppercase block mb-1.5">robots.txt AI 설정</label>
-                                <textarea value={editAi.robotsTxt} onChange={e => setEditAi(p => ({ ...p, robotsTxt: e.target.value }))}
-                                    rows={3} placeholder="User-agent: GPTBot&#10;Allow: /&#10;&#10;User-agent: Claude-Web&#10;Allow: /"
-                                    className="w-full border border-neutral-200 px-3 py-2 text-xs font-mono focus:border-neutral-400 focus:outline-none bg-white resize-y" />
-                                <p className="text-[10px] text-neutral-400 mt-1">AI 크롤러 접근 허용/차단 규칙</p>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-medium text-neutral-500 uppercase block mb-1.5">구조화 데이터 (JSON-LD)</label>
-                                <textarea value={editAi.structuredData} onChange={e => setEditAi(p => ({ ...p, structuredData: e.target.value }))}
-                                    rows={4} placeholder='{"@context":"https://schema.org","@type":"Organization","name":"..."}'
-                                    className="w-full border border-neutral-200 px-3 py-2 text-xs font-mono focus:border-neutral-400 focus:outline-none bg-white resize-y" />
-                                <p className="text-[10px] text-neutral-400 mt-1">검색엔진과 AI가 사이트 정보를 정확히 파악하도록 돕는 메타데이터</p>
-                            </div>
-                        </div>
-
                         {/* 저장 */}
                         {saveError && (
                             <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-100">
@@ -473,6 +442,9 @@ export default function SitesListPage() {
                                 {saving ? "저장 중..." : saved ? "저장 완료" : "저장"}
                             </button>
                         </div>
+
+                        {/* 검색 노출 · 인공지능 최적화 — 저장 따로 (lib/site-seo.ts) */}
+                        <SiteSeoPanel key={selectedSite} siteId={selectedSite!} />
                     </div>
                 ) : (
                     <div className="bg-white border border-neutral-100 flex items-center justify-center py-24">
