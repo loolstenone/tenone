@@ -8,6 +8,7 @@ import { PageHeader, TabNav, EmptyState } from "@/components/intra/IntraUI";
 interface Person { id: string; name: string | null; handle: string | null; profile_visibility: string | null; profile_blocked_at: string | null }
 interface Report {
     id: string;
+    scope: string;
     reason_label: string;
     detail: string | null;
     status: "pending" | "hidden" | "dismissed";
@@ -64,7 +65,7 @@ export default function ProfileReportsPage() {
 
     return (
         <div>
-            <PageHeader title="프로필 신고" description="공개 프로필(tenone.biz/@핸들)에 들어온 신고. 숨기면 비공개 전환·검색 제외·공유 링크 회수가 함께 됩니다." />
+            <PageHeader title="프로필 신고" description="공개 프로필(tenone.biz/@핸들·브랜드 /@핸들)에 들어온 신고. 숨기면 유니버스·브랜드 공개가 모두 내려가고 공유 링크도 회수됩니다." />
             <TabNav tabs={TABS} active={tab} onChange={setTab} />
             {error && <p className="text-xs text-red-600 my-3">{error}</p>}
             {reports === null ? (
@@ -84,6 +85,7 @@ export default function ProfileReportsPage() {
                                             <a href={`/@${r.target.handle}`} target="_blank" rel="noreferrer" className="text-xs text-neutral-500 underline">@{r.target.handle}</a>
                                         )}
                                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600">{STATUS_LABEL[r.status]}</span>
+                                        <span className="text-[10px] px-2 py-0.5 rounded-full border border-neutral-200 text-neutral-500">{r.scope === "universe" ? "유니버스 프로필" : `${r.scope} 프로필`}</span>
                                         {blocked && <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-700">숨김 중</span>}
                                     </div>
                                     <p className="text-xs text-neutral-700"><b>{r.reason_label}</b>{r.detail ? ` · ${r.detail}` : ""}</p>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { domainPrefixMap, getCookieDomain, CANONICAL_HOSTS } from '@/lib/domain-registry';
+import { brandProfileByPrefix } from '@/lib/profile/brand-profiles';
 import { getApiAccessRule } from '@/lib/api-access-policy';
 import { requireStaff } from '@/lib/api-guard';
 
@@ -169,13 +170,27 @@ export async function middleware(request: NextRequest) {
     // 2a. /@handle → 호스트별 분기
     //     myverse.kr → /myverse/{handle} (Myverse 공개 페이지)
     //     그 외      → /profile/{handle} (유니버스 프로필)
+    //     브랜드 My Profile 사이트(lib/profile/brand-profiles.ts) → /{brand}/u/{handle}
     const atHandleMatch = pathname.match(/^\/@([^/]+)$/);
     if (atHandleMatch) {
         const url = request.nextUrl.clone();
         const isMyverseHost = reqDomain === "myverse.kr" || reqDomain === "www.myverse.kr" || reqDomain === "myverse.tenone.biz";
+        const brandProfile = brandProfileByPrefix(domainPrefixMap[reqDomain]);
         url.pathname = isMyverseHost
             ? `/myverse/${atHandleMatch[1]}`
-            : `/profile/${atHandleMatch[1]}`;
+            : brandProfile
+                ? `${brandProfile.prefix}/u/${atHandleMatch[1]}`
+                : `/profile/${atHandleMatch[1]}`;
+        const rewrite = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
+        response.cookies.getAll().forEach(c => rewrite.cookies.set(c));
+        return rewrite;
+    }
+
+    // 2a-1. /{brand}/@handle (경로 모드 — localhost·tenone.biz/{brand}) → /{brand}/u/{handle}
+    const brandAtMatch = pathname.match(/^(\/[a-z0-9]+)\/@([^/]+)$/);
+    if (brandAtMatch && brandProfileByPrefix(brandAtMatch[1])) {
+        const url = request.nextUrl.clone();
+        url.pathname = `${brandAtMatch[1]}/u/${brandAtMatch[2]}`;
         const rewrite = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
         response.cookies.getAll().forEach(c => rewrite.cookies.set(c));
         return rewrite;

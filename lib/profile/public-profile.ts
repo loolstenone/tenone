@@ -58,3 +58,29 @@ export function friendlyDbError(err: { code?: string; message?: string } | null 
     if (err.code === '23505') return '이미 사용 중인 값입니다.';
     return fallback;
 }
+
+/** 브랜드 공개 프로필 응답 (get_brand_profile · preview_my_brand_profile) — 공개 항목은 DB brand_profile_payload가 정한다 */
+export interface BrandProfileRow {
+    id?: string;
+    name?: string;
+    handle?: string;
+    brand?: string;
+    avatar_url?: string | null;
+    bio?: string | null;
+    company?: string | null;
+    social_links?: Record<string, string> | null;
+    profile_visibility?: 'public' | 'private';
+    searchable?: boolean;
+    via_share?: boolean;
+    moved_to?: string;
+    /** 브랜드가 자기 데이터로 만든 섹션 (모양은 브랜드마다) */
+    section?: Record<string, unknown> | null;
+    /** 본인이 고른 다른 브랜드 활동 */
+    universe?: { brand_id: string; brand_name: string; items: { capability: string; role: string; year: string | null; active: boolean }[] }[];
+}
+
+/** capability 라벨 (CLAUDE.md §1.3.1) */
+export const CAPABILITY_LABEL: Record<string, string> = {
+    community: '커뮤니티', meetup: '모임', club: '동아리', portfolio: '포트폴리오', membership: '멤버십',
+    course: '강의', showcase: '이벤트', subscription: '구독', purchase: '구매',
+};

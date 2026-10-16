@@ -500,7 +500,8 @@ import { MyProfileCard } from "@/components/MyProfileCard";
 - **공개는 본인이 켤 때만** (기본 비공개). 공개 조건 = 만 14세 이상 동의(`consent.age_14_plus`) + 운영 숨김 아님. 검색 노출(`profile_searchable`)은 공개와 **별도 동의**, 기본 noindex
 - **공개 항목은 DB 함수 `profile_public_payload` 한 곳에서만 고른다** — 공개 화면·공유 링크·본인 미리보기·미리보기 카드가 같은 결과. 연락처는 어떤 경우에도 공개하지 않는다. 다른 브랜드 섹션은 본인이 켠 것만 (계약 4)
 - 비공개 공유 = 기한 있는 링크 (`?s=토큰`, 1·7·30일, 10개, 회수 가능, DB엔 해시만) · 방문 수 = 하루 집계만 · 신고 → 인트라 › 통합 회원 › 프로필 신고 (Action Hub) → 운영 숨김(`profile_blocked_at`, service_role만)
-- 브랜드별 공개 설정 = `member_brand_profile_settings` (P2 My Profile — 브랜드 도메인 `/@핸들`)
+- **브랜드 My Profile** (P2, 2026-10-16 — `sql/profile-p2-brand.sql`): 브랜드 도메인 `/@핸들` → middleware가 `lib/profile/brand-profiles.ts` 등록 브랜드면 `/{brand}/u/{핸들}` (그 외 도메인은 유니버스 `/profile/{핸들}`). 공개 = `member_brand_profile_settings`(그 브랜드 가입 회원만·만 14세) · 공개 항목 = DB `brand_profile_payload` 한 곳 · 브랜드 섹션 = 그 브랜드 소유 함수(`madleague_profile_section`) · 다른 브랜드 활동 = 본인이 체크한 브랜드만(체크 = 동의, `include_consent_at`) · 유니버스 프로필 링크는 본인 화면에만. 설정 화면 `components/profile/BrandProfilePanel.tsx`(브랜드 마이페이지) · 브랜드만 탈퇴 → 설정·공유 링크 자동 정리
+  - 브랜드 추가 3곳: `BRAND_PROFILES` · DB `brand_profile_enabled`·`brand_profile_section` + `{brand}_profile_section()` · `app/({Brand})/{brand}/u/[handle]/`(page·layout·not-found·opengraph-image)
 - ❌ 화면에서 공개 항목을 따로 고르기 (DB 함수 우회) ❌ 핸들로 로그인·이메일 조회 ❌ 다른 브랜드 활동을 본인 동의 없이 공개 프로필에 노출
 
 ### 프로필 이미지 (아바타)

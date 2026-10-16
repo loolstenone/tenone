@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const status = new URL(request.url).searchParams.get('status') ?? 'pending';
     const admin = createAdminClient();
     let q = admin.from('profile_reports')
-        .select('id, target_member_id, scope, reason, detail, reporter_member_id, status, handled_at, handled_note, created_at')
+        .select('id, target_member_id, scope, brand_id, reason, detail, reporter_member_id, status, handled_at, handled_note, created_at')
         .order('created_at', { ascending: false })
         .limit(200);
     if (status !== 'all') q = q.eq('status', status);

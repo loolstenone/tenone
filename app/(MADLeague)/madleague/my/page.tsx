@@ -13,6 +13,9 @@ import {
     LogOut, Settings, Users
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { BrandProfilePanel } from "@/components/profile/BrandProfilePanel";
+import { BRAND_PROFILES } from "@/lib/profile/brand-profiles";
+import { MadProfileSection, type MadSection } from "@/features/madleague/MadProfileSection";
 
 interface MadMemberInfo {
     role: string;
@@ -245,6 +248,12 @@ export default function MadLeagueMyPage() {
                         <ArrowRight className="h-4 w-4 text-[#EC1D25] group-hover:translate-x-1 transition-transform" />
                     </Link>
                 )}
+
+                {/* 공개 프로필 (www.madleague.net/@핸들) — 공개·보일 항목·다른 활동·공유 링크 */}
+                <div className="mt-10 mb-10">
+                    <BrandProfilePanel cfg={BRAND_PROFILES.madleague}
+                        renderSection={section => <MadProfileSection section={section as MadSection} basePath="/madleague" />} />
+                </div>
 
                 {/* 로그아웃 */}
                 <button

@@ -20,7 +20,8 @@ const REASONS = [
     { value: "other", label: "기타" },
 ] as const;
 
-export function ProfileReportButton({ targetMemberId }: { targetMemberId: string }) {
+/** scope = 'universe'(tenone.biz/@핸들) 또는 브랜드 slug(브랜드 공개 프로필) */
+export function ProfileReportButton({ targetMemberId, scope = "universe", dark = false }: { targetMemberId: string; scope?: string; dark?: boolean }) {
     const { user, isAuthenticated } = useAuth();
     const pathname = usePathname();
     const [open, setOpen] = useState(false);
@@ -36,6 +37,8 @@ export function ProfileReportButton({ targetMemberId }: { targetMemberId: string
         const { error } = await createClient().from("profile_reports").insert({
             target_member_id: targetMemberId,
             reporter_member_id: user.id,
+            scope,
+            brand_id: scope === "universe" ? "tenone" : scope,
             reason,
             detail: detail.trim() || null,
         });
@@ -49,7 +52,7 @@ export function ProfileReportButton({ targetMemberId }: { targetMemberId: string
                 <Flag className="h-3 w-3" /> 신고
             </button>
             {open && (
-                <div className="mt-2 text-left rounded-xl border tn-border tn-surface p-4 space-y-3">
+                <div className={`mt-2 text-left rounded-xl border p-4 space-y-3 ${dark ? "border-neutral-800 bg-neutral-950" : "tn-border tn-surface"}`}>
                     {!isAuthenticated ? (
                         <p className="text-xs tn-text-sub">
                             신고는 로그인 후 할 수 있습니다. <Link href={loginHref(pathname)} className="underline">로그인</Link>
