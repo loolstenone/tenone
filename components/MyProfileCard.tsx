@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Globe, ChevronRight, Building2, Trash2 } from 'lucide-react';
 
+import { CrossSiteLink } from "@/components/CrossSiteLink";
 /** 전화번호 포맷: 010-1234-5678 */
 function formatPhone(value: string): string {
     const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -145,14 +146,14 @@ export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark"
 
                 {/* 계정 관리 링크 (null이면 숨김) — 이름·사진·소개 수정과 공개 설정은 계정 하나에서 */}
                 {upHref && (
-                    <Link href={upHref} className={universeLinkCls}>
+                    <CrossSiteLink href={upHref} className={universeLinkCls}>
                         <Globe className={universeIconCls} />
                         <div className="flex-1">
                             <p className={universePrimaryCls}>계정 관리</p>
                             <p className={universeSecondaryCls}>이름·사진·소개 수정 · 공개 설정 — 모든 서비스 공통</p>
                         </div>
                         <ChevronRight className={universeChevronCls} />
-                    </Link>
+                    </CrossSiteLink>
                 )}
 
                 {/* 계정 탈퇴 */}

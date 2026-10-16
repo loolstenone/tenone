@@ -95,7 +95,12 @@ const registry: Record<string, DomainEntry> = {
     'auth.tenone.biz':          { prefix: '/auth-hub',   siteId: 'tenone' },
     // Intra (내부 관리자)
     'intra.tenone.biz':         { prefix: '/intra',      siteId: 'tenone' },
+    // 계정 관리 (Google 계정에 해당 — 회원 본인 화면, docs/Account_Subdomain_Plan.md 2026-10-16)
+    'account.tenone.biz':       { prefix: '/profile',    siteId: 'tenone' },
 };
+
+/** 계정 관리 공식 주소 — /profile(본인 화면)은 어느 도메인에서 열어도 여기로 */
+export const ACCOUNT_ORIGIN = 'https://account.tenone.biz';
 
 // ── 공식 주소 (canonical) — CLAUDE.md §0.1 원칙 4·6 ──
 //
@@ -216,7 +221,7 @@ const SITE_DOMAIN_OVERRIDES: Partial<Record<SiteIdentifier, SiteDomainEntry[]>> 
 };
 
 // 인트라 전용 — 도메인 목록 표시에서 제외
-const INTERNAL_DOMAINS = new Set(['auth.tenone.biz', 'intra.tenone.biz']);
+const INTERNAL_DOMAINS = new Set(['auth.tenone.biz', 'intra.tenone.biz', 'account.tenone.biz']);
 
 /**
  * siteId에 해당하는 실제 운영 도메인 목록을 반환한다.

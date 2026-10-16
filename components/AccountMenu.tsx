@@ -97,7 +97,7 @@ export function AccountMenu({ profilePath, siteId, mode = "dropdown", placement 
                 {/* 이름 고정 (2026-10-16 사용자 지시): 이 사이트의 나 = '마이 페이지', Ten:One 계정 = '계정 관리' (Google 계정처럼) */}
                 {profilePath && <Link href={profilePath} onClick={close} className={row}>마이 페이지</Link>}
                 {/* 공개 프로필은 따로 두지 않는다 — 내용 수정·공개 여부·주소·공유를 한 화면에서 (2026-10-16) */}
-                {profilePath !== "/profile" && <Link href="/profile" onClick={close} className={row}>계정 관리</Link>}
+                {profilePath !== "/profile" && <CrossSiteLink href="/profile" onClick={close} className={row}>계정 관리</CrossSiteLink>}
             </div>
 
             {services && services.length > 0 && (

@@ -1,6 +1,8 @@
 # 계정 관리 → account.tenone.biz 이전 계획
 
-> 작성 2026-10-16 (세션 179) · 상태: **계획 — 코드 미착수**
+> 작성 2026-10-16 (세션 179) · 상태: **코드 적용 (배포 전)** — 외부 작업 완료: Vercel에 account·admin·mypage.tenone.biz 연결(Valid), 가비아 DNS, Supabase Redirect URLs 3개
+>
+> 적용 내용: `account.tenone.biz/` = 계정 관리 · 어느 도메인이든 `/profile` → account 308 · account의 다른 경로 → www 308 · `admin.tenone.biz` → `intra.tenone.biz` 308 · `mypage.tenone.biz` → `www.tenone.biz/my` 308 · `/profile` 링크는 `CrossSiteLink`(account 절대 주소) · 이월: 2-6(LoginRequired), 2-8(site-check 항목)
 > 결정: 사용자 승인 (2026-10-16) — 계정 관리는 `account.tenone.biz` 하나로, 사이트별 마이 페이지는 각 사이트 `/my`에 그대로
 
 ## 1. 이름과 자리 (Google 대응)

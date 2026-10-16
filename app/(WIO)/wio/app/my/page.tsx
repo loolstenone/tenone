@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useWIO } from '../layout';
 import { createClient } from '@/lib/supabase/client';
 
+import { CrossSiteLink } from "@/components/CrossSiteLink";
 /* ── MY 탭 네비게이션 ── */
 const MY_TABS = [
   { label: '대시보드', href: '/wio/app/my' },
@@ -394,14 +395,14 @@ export default function MyHomePage() {
       </div>
 
       {/* Universe Profile */}
-      <Link href="/profile" className="mt-8 flex items-center gap-3 p-4 rounded-xl border border-neutral-700 hover:border-neutral-500 transition-colors group">
+      <CrossSiteLink href="/profile" className="mt-8 flex items-center gap-3 p-4 rounded-xl border border-neutral-700 hover:border-neutral-500 transition-colors group">
         <Globe className="h-5 w-5 text-neutral-500 group-hover:text-white transition-colors" />
         <div className="flex-1">
           <p className="text-sm font-medium text-neutral-300 group-hover:text-white transition-colors">Universe Profile</p>
           <p className="text-[11px] text-neutral-500">전체 서비스 프로필 관리</p>
         </div>
         <ChevronRight className="h-4 w-4 text-neutral-600 group-hover:text-neutral-400 transition-colors" />
-      </Link>
+      </CrossSiteLink>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import Link from "next/link";
+import { CrossSiteLink } from "@/components/CrossSiteLink";
 import {
     User, FileText, Bookmark, Settings, LogOut,
     ChevronRight, Eye, MessageCircle,
@@ -134,14 +135,14 @@ export default function MyPage() {
                 {/* 설정 */}
                 {activeTab === "settings" && (
                     <div className="space-y-4">
-                        <Link href="/profile" className="flex items-center justify-between p-4 rounded-lg transition-colors hover:opacity-80"
+                        <CrossSiteLink href="/profile" className="flex items-center justify-between p-4 rounded-lg transition-colors hover:opacity-80"
                             style={{ backgroundColor: "var(--tn-bg-alt)" }}>
                             <div className="flex items-center gap-3">
                                 <User className="h-5 w-5" style={{ color: "var(--tn-text-muted)" }} />
                                 <span className="text-sm">프로필 수정</span>
                             </div>
                             <ChevronRight className="h-4 w-4" style={{ color: "var(--tn-text-muted)" }} />
-                        </Link>
+                        </CrossSiteLink>
                         <button onClick={() => { logout(); router.push("/"); }}
                             className="w-full flex items-center gap-3 p-4 rounded-lg text-red-500 transition-colors hover:opacity-80"
                             style={{ backgroundColor: "var(--tn-bg-alt)" }}>

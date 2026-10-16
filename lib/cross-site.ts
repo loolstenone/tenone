@@ -6,15 +6,26 @@
  * - 로그인 상태로 다른 독립 도메인에 갈 때는 허브(auth.tenone.biz)를 거쳐 로그인도 함께 넘긴다 (One ID — lib/sso-server.ts)
  * - 약관·개인정보·로그인·프로필처럼 모든 도메인이 공유하는 경로는 그대로
  */
-import { siteOriginForPath, isExternalDomain } from '@/lib/domain-registry';
+import { siteOriginForPath, isExternalDomain, ACCOUNT_ORIGIN } from '@/lib/domain-registry';
 
 const SHARED_PATHS = ['/terms', '/privacy', '/profile', '/login', '/signup', '/reset-password', '/auth'];
 const HUB_ORIGIN = 'https://auth.tenone.biz';
 
+/** /profile(본인 계정 관리) — 공개 프로필 /profile/{핸들}은 아님 */
+function isAccountPath(path: string): boolean {
+    return path === '/profile' || path.startsWith('/profile?');
+}
+function accountHref(path: string): string {
+    return `${ACCOUNT_ORIGIN}/${path.slice('/profile'.length)}`;
+}
+
 export function crossSiteHref(path: string, opts: { loggedIn?: boolean } = {}): string {
     if (typeof window === 'undefined' || !path.startsWith('/') || path.startsWith('//')) return path;
     const host = window.location.hostname;
-    if (host === 'localhost' || host === 'tenone.biz' || host === 'www.tenone.biz') return path;
+    if (host === 'localhost') return path;
+    // 계정 관리는 account.tenone.biz 하나 (2026-10-16) — .tenone.biz 쿠키라 허브 세션이 있으면 바로 열린다
+    if (isAccountPath(path)) return accountHref(path);
+    if (host === 'tenone.biz' || host === 'www.tenone.biz') return path;
     if (SHARED_PATHS.some(p => path === p || path.startsWith(`${p}/`) || path.startsWith(`${p}?`))) return path;
 
     const target = new URL(siteOriginForPath(path));
@@ -36,6 +47,7 @@ export function crossSiteHref(path: string, opts: { loggedIn?: boolean } = {}): 
  */
 export function crossSiteHrefStatic(path: string): string {
     if (!path.startsWith('/') || path.startsWith('//')) return path;
+    if (isAccountPath(path)) return accountHref(path);
     if (SHARED_PATHS.some(p => path === p || path.startsWith(`${p}/`) || path.startsWith(`${p}?`))) return path;
     return `${siteOriginForPath(path)}${path}`;
 }

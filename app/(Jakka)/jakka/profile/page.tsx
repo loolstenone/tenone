@@ -14,6 +14,7 @@ import {
 } from "@/lib/supabase/jakka";
 import { useRouter } from "next/navigation";
 
+import { CrossSiteLink } from "@/components/CrossSiteLink";
 type MySection = "posts" | "following" | "followers" | "likes";
 
 function OnboardingForm({ userId, email, onCreated }: { userId: string; email: string; onCreated: (c: JakkaCreator) => void }) {
@@ -271,10 +272,10 @@ export default function JakkaProfilePage() {
                     <h1 className="text-[22px] font-black tracking-tight leading-none mb-1.5 text-neutral-900">{creator.display_name}</h1>
                     <div className="flex items-center gap-2 flex-wrap mb-2.5">
                         <p className="text-[12px] font-mono font-semibold text-neutral-500">{creator.handle}</p>
-                        <Link href="/profile" className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-neutral-600 hover:text-neutral-700 transition-colors">
+                        <CrossSiteLink href="/profile" className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-neutral-600 hover:text-neutral-700 transition-colors">
                             <Globe className="h-3 w-3" />
                             Universe
-                        </Link>
+                        </CrossSiteLink>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                         {creator.status && (

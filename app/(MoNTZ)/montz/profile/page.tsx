@@ -10,6 +10,7 @@ import { LoginModal } from "@/components/LoginModal";
 import { VerificationModal } from "@/features/montz/VerificationModal";
 import { MontzOnboarding } from "@/features/montz/MontzOnboarding";
 
+import { CrossSiteLink } from "@/components/CrossSiteLink";
 const AVAIL_LABEL: Record<MontzAvailability, string> = {
     active: "활동중",
     selective: "조건부",
@@ -121,10 +122,10 @@ export default function MontzMyProfilePage() {
                         </div>
                         <div className="flex items-center gap-2 flex-wrap mb-2">
                             <p className="text-[12px] font-mono text-neutral-500">@{handle}</p>
-                            <Link href="/profile" className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-neutral-500 hover:text-neutral-900 transition-colors">
+                            <CrossSiteLink href="/profile" className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-neutral-500 hover:text-neutral-900 transition-colors">
                                 <Globe className="h-3 w-3" />
                                 Universe
-                            </Link>
+                            </CrossSiteLink>
                         </div>
                         {creator && (
                             <div className="flex flex-wrap gap-1.5">

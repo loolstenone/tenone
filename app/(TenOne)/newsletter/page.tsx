@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
 import NewsletterSubscribeForm from "@/components/newsletter/NewsletterSubscribeForm";
 
+import { CrossSiteLink } from "@/components/CrossSiteLink";
 interface NewsletterIssue {
     id: number;
     title: string;
@@ -79,9 +80,9 @@ export default function NewsletterPage() {
                         <Mail className="h-8 w-8 tn-text-sub mx-auto mb-3" />
                         <h3 className="text-sm font-bold mb-1">이미 뉴스레터를 구독하고 있습니다</h3>
                         <p className="text-xs tn-text-sub">{user?.email}</p>
-                        <Link href="/profile" className="inline-block mt-3 text-xs tn-text-sub hover:text-neutral-700 underline underline-offset-2">
+                        <CrossSiteLink href="/profile" className="inline-block mt-3 text-xs tn-text-sub hover:text-neutral-700 underline underline-offset-2">
                             프로필에서 구독 관리 →
-                        </Link>
+                        </CrossSiteLink>
                     </div>
                 ) : isAuthenticated && !sent ? (
                     <div className="text-center py-2">

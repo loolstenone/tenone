@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { domainPrefixMap, getCookieDomain, CANONICAL_HOSTS } from '@/lib/domain-registry';
+import { domainPrefixMap, getCookieDomain, CANONICAL_HOSTS, ACCOUNT_ORIGIN } from '@/lib/domain-registry';
 import { brandProfileByPrefix } from '@/lib/profile/brand-profiles';
 import { autoSsoRedirect } from '@/lib/sso-auto';
 import { madleagueLegacyRedirect, MADLEAGUE_LEGACY_HOSTS } from '@/lib/madleague-legacy-redirects';
@@ -56,7 +56,25 @@ export async function middleware(request: NextRequest) {
         // 공식 주소의 apex(www 없는 주소) → www 308. Vercel 도메인 리다이렉트를 빠뜨려도 중복 주소가 생기지 않게 (2026-10-14 planners.ai.kr)
         const apexOf = Object.values(CANONICAL_HOSTS).find(c => c.hosting === 'vercel' && c.host === `www.${reqHost}`);
 
-        if (apexOf) {
+        // 계정 관리·관리자 주소 (2026-10-16, docs/Account_Subdomain_Plan.md)
+        //   - admin.tenone.biz  → intra.tenone.biz (Google admin = 조직 관리 콘솔 = 인트라)
+        //   - mypage.tenone.biz → www.tenone.biz/my (마이 페이지는 각 사이트 /my)
+        //   - 어느 도메인이든 /profile(본인 화면) → account.tenone.biz/ · account의 다른 화면 경로는 www로
+        const isAccountHost = reqHost === 'account.tenone.biz';
+        const knownHost = isTenoneMain || reqHost in domainPrefixMap;
+        const accountPass = /^\/(api|auth|_next|login|signup|reset-password|oauth|terms|privacy)(\/|$)/.test(pathname) || pathname.includes('.');
+
+        if (reqHost === 'admin.tenone.biz') {
+            target = `https://intra.tenone.biz${pathname}${request.nextUrl.search}`;
+        } else if (reqHost === 'mypage.tenone.biz') {
+            target = 'https://www.tenone.biz/my';
+        } else if (isAccountHost && !accountPass && pathname !== '/') {
+            target = pathname === '/profile'
+                ? `${ACCOUNT_ORIGIN}/${request.nextUrl.search}`
+                : `https://www.tenone.biz${pathname}${request.nextUrl.search}`;
+        } else if (!isAccountHost && knownHost && pathname === '/profile') {
+            target = `${ACCOUNT_ORIGIN}/${request.nextUrl.search}`;
+        } else if (apexOf) {
             target = `https://${apexOf.host}${pathname}${request.nextUrl.search}`;
         } else if (isTenoneMain && firstSeg === 'intra') {
             target = `https://intra.tenone.biz${pathname}${request.nextUrl.search}`;

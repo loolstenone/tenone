@@ -27,6 +27,7 @@ import type { SystemAccess } from "@/types/auth";
 import { createClient } from "@/lib/supabase/client";
 import { gradeConfig, getPointsToNextGrade } from "@/types/point";
 
+import { CrossSiteLink } from "@/components/CrossSiteLink";
 const MOCK_PROJECTS: { name: string; code: string; role: string; progress: number; status: "진행중" | "계획" | "완료" }[] = [];
 
 // 빈 상태 컴포넌트
@@ -327,9 +328,9 @@ export function StaffHome({ mode }: { mode: "workspace" | "my" }) {
                         {tenureText && <span className="text-xs text-neutral-400">{tenureText}</span>}
                     </div>
                 </div>
-                <Link href="/profile" className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-neutral-200 text-neutral-500 hover:text-neutral-900 hover:border-neutral-400 transition-colors">
+                <CrossSiteLink href="/profile" className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-neutral-200 text-neutral-500 hover:text-neutral-900 hover:border-neutral-400 transition-colors">
                     <Edit2 className="h-3 w-3" /> 정보 수정
-                </Link>
+                </CrossSiteLink>
             </div>
             </>)}
 
