@@ -11,7 +11,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Shield, Loader2, Check, X, Sparkles, ArrowRight } from "lucide-react";
+import { Shield, Loader2, Check, X, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface Props {
@@ -94,9 +94,12 @@ export default function HeroBadgeOptIn({ memberId }: Props) {
         setSaving(false);
     }
 
+    // 프로필 화면의 다른 카드와 같은 테마 토큰 (라이트·다크 자동) — 그라데이션·색 배경 없음
+    const card = "rounded-2xl border tn-border tn-surface";
+
     if (loading) {
         return (
-            <div className="flex items-center gap-2 text-xs text-neutral-400 py-3 px-4 border border-neutral-200 rounded-lg">
+            <div className={`flex items-center gap-2 text-xs tn-text-sub py-3 px-4 ${card}`}>
                 <Loader2 className="h-3.5 w-3.5 animate-spin" /> 영웅 유형 확인 중...
             </div>
         );
@@ -105,49 +108,46 @@ export default function HeroBadgeOptIn({ memberId }: Props) {
     // HIT A 미완료 — 검사 유도
     if (!heroType) {
         return (
-            <Link href="/hero/hit/a"
-                className="flex items-center gap-3 p-4 border border-dashed border-neutral-300 hover:border-rose-400 rounded-lg transition-colors bg-white">
-                <div className="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center">
-                    <Shield className="h-5 w-5 text-neutral-400" />
-                </div>
+            <Link href="/hero/hit/a" className={`flex items-center gap-3 p-4 transition-opacity hover:opacity-80 ${card}`}>
+                <Shield className="h-5 w-5 tn-text-sub shrink-0" />
                 <div className="flex-1">
-                    <p className="text-sm font-semibold text-neutral-700">유니버스 배지</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">
+                    <p className="text-sm font-semibold tn-text">유니버스 배지</p>
+                    <p className="text-xs tn-text-sub mt-0.5">
                         HeRo HIT 검사로 당신의 영웅 유형을 발견하면 배지로 프로필에 표시됩니다
                     </p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-neutral-400" />
+                <ArrowRight className="h-4 w-4 tn-text-sub" />
             </Link>
         );
     }
 
     // HIT A 완료 — 토글 노출
     return (
-        <div className="p-4 border border-neutral-200 rounded-lg bg-gradient-to-br from-white to-rose-50/30">
-            <div className="flex items-start gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-rose-100 to-amber-50 flex items-center justify-center shrink-0">
-                    <Sparkles className="h-5 w-5 text-rose-500" />
-                </div>
+        <div className={`p-5 ${card}`}>
+            <div className="flex items-start gap-3 mb-4">
+                <Shield className="h-5 w-5 tn-text-sub shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-neutral-800">유니버스 배지</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">
-                        당신의 영웅 유형: <span className="font-mono text-rose-600">{heroType.type_code}</span>
+                    <p className="text-sm font-semibold tn-text">유니버스 배지</p>
+                    <p className="text-xs tn-text-sub mt-0.5">
+                        당신의 영웅 유형: <span className="font-mono font-semibold tn-text">{heroType.type_code}</span>
                         {" · "}{heroType.character_name}
                     </p>
-                    <p className="text-[11px] text-neutral-400 mt-0.5">{heroType.character_label}</p>
+                    {heroType.character_label && <p className="text-[11px] tn-text-sub mt-0.5">{heroType.character_label}</p>}
                 </div>
             </div>
 
-            <div className="flex items-center justify-between gap-3 pt-3 border-t border-neutral-100">
+            <div className="flex items-center justify-between gap-3 pt-4 border-t tn-border">
                 <div className="min-w-0">
-                    <p className="text-xs font-semibold text-neutral-700">전 Universe 브랜드에 배지 표시</p>
-                    <p className="text-[11px] text-neutral-400 mt-0.5">
-                        Badak · MADLeague · Jakka 등 모든 브랜드 프로필 카드에 배지로 노출됩니다
+                    <p className="text-xs font-semibold tn-text">전 Universe 브랜드에 배지 표시</p>
+                    <p className="text-[11px] tn-text-sub mt-0.5">
+                        {isPublic
+                            ? "공개 중 - Badak · MADLeague · Jakka 등 브랜드 프로필 카드에 배지가 보입니다. 언제든 끌 수 있습니다."
+                            : "켜면 Badak · MADLeague · Jakka 등 브랜드 프로필 카드에 배지가 보입니다."}
                     </p>
                 </div>
-                <button onClick={toggle} disabled={saving}
-                    className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${isPublic ? "bg-rose-500" : "bg-neutral-300"} disabled:opacity-60`}
-                    aria-label="badge toggle">
+                <button onClick={toggle} disabled={saving} role="switch" aria-checked={isPublic}
+                    className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${isPublic ? "bg-rose-500" : "bg-neutral-400/50"} disabled:opacity-60`}
+                    aria-label="유니버스 배지 표시">
                     <span className={`absolute top-0.5 h-5 w-5 bg-white rounded-full shadow transition-transform flex items-center justify-center ${
                         isPublic ? "translate-x-5" : "translate-x-0.5"
                     }`}>
@@ -155,12 +155,6 @@ export default function HeroBadgeOptIn({ memberId }: Props) {
                     </span>
                 </button>
             </div>
-
-            {isPublic && (
-                <div className="mt-3 p-2 bg-rose-50 border border-rose-100 rounded text-[10px] text-rose-700">
-                    ✓ 배지가 공개 중입니다. 언제든 끌 수 있습니다.
-                </div>
-            )}
         </div>
     );
 }
