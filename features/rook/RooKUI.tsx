@@ -23,7 +23,7 @@ export function rookCategoryColor(board: RookBoard | "freeboard", category: stri
 const ASSET_BASE = "https://ziotlxkdctlhiwkgmmsh.supabase.co/storage/v1/object/public/board-assets/rook/site";
 /** 사이트 이미지 (2026-10-07 www.rook.co.kr에서 Storage로 이전) */
 export const ROOK_ASSETS = {
-    logo: `${ASSET_BASE}/logo2.png`,
+    logo: `${ASSET_BASE}/logo3.webp`, // 2026-10-16 새 로고 (룩 말 + RooK)
     aboutTitle: `${ASSET_BASE}/about_hero.png`,
     aboutRook: `${ASSET_BASE}/about_rook.png`,
     rookieTitle: `${ASSET_BASE}/rookie_hero.png`,
