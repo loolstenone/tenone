@@ -99,7 +99,11 @@ export default async function PortfolioPage() {
   const certs = (certRows ?? []).map((c: { id: string; type: string; issued_at: string; code: string; snapshot: { label?: string; title?: string } | null }) =>
     ({ id: c.id, type: c.type, issued_at: c.issued_at, cert_code: c.code, label: c.snapshot?.label ? `${c.snapshot.label} · ${c.snapshot.title ?? ''}` : null }));
 
-  const publicUrl = `/madleague/portfolio/${m.id}`;
+  // 공개 = 새 공개 프로필 (/madleague/@핸들, 설정은 마이페이지) — 옛 /madleague/portfolio/{id}는 그쪽으로 넘어간다
+  const { data: coreHandle } = core
+    ? await createAdminClient().from('members').select('handle').eq('id', core.id).maybeSingle()
+    : { data: null };
+  const publicUrl = coreHandle?.handle ? `/madleague/@${coreHandle.handle}` : null;
 
   return (
     <div className="bg-[var(--mad-black,#000)] text-white min-h-screen">
@@ -116,14 +120,11 @@ export default async function PortfolioPage() {
               <h1 className="text-3xl sm:text-4xl font-black tracking-tight">내 포트폴리오</h1>
               <p className="mt-2 text-sm text-neutral-500">
                 활동 이력이 자동으로 집계됩니다.{' '}
-                {m.portfolio_public
-                  ? <span className="text-green-400">공개 중</span>
-                  : <span className="text-neutral-500">비공개</span>
-                }
+                <Link href="/madleague/my" className="underline underline-offset-4 hover:text-white">공개 프로필 설정</Link>
               </p>
             </div>
             <div className="flex gap-2">
-              {m.portfolio_public && (
+              {publicUrl && (
                 <Link
                   href={publicUrl}
                   target="_blank"

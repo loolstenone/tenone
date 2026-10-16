@@ -17,6 +17,6 @@ export const LEGAL_DOCUMENTS = {
     /** ① Ten:One 통합 이용약관 (계정 약관) — 가입 시 동의 */
     terms: { version: "2026-10-05", effectiveDate: "2026년 10월 5일", path: "/terms" },
     /** 유니버스 공통 개인정보처리방침 — 고지 (동의 대상 아님) */
-    privacy: { version: "2026-10-14", effectiveDate: "2026년 10월 14일", path: "/privacy" },
+    privacy: { version: "2026-10-16", effectiveDate: "2026년 10월 16일", path: "/privacy" },
     // ② 서비스별 추가 약관 — 해당 서비스 기능을 실제 출시할 때 추가 (예: hero: { version, effectiveDate, path: "/terms/hero" })
 } as const;

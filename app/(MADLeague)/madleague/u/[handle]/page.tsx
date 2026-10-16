@@ -63,26 +63,32 @@ export default async function MadPublicProfilePage({ params, searchParams }: Pro
             : { p_handle: h, p_brand: cfg.siteId }),
         createServerClient(),
     ]);
-    const row = res.data as BrandProfileRow | null;
+    let row = res.data as BrandProfileRow | null;
     if (!row) notFound();
     if (row.moved_to) redirect(`${cfg.prefix}/@${row.moved_to}`);
+
+    // 본인 판단 = 로그인한 내 핸들과 같은가 (비공개 응답에는 id가 없다)
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    let isOwner = false;
+    if (authUser) {
+        const { data: me } = await supabase.from('members').select('handle').eq('auth_id', authUser.id).maybeSingle();
+        isOwner = me?.handle === h;
+    }
 
     const viaShare = !!row.via_share;
     const isPublic = row.profile_visibility === 'public';
     if (!isPublic && !viaShare) {
-        return (
-            <div className="min-h-screen bg-black text-white">
-                <ProfileInvite variant={share ? 'expired' : 'private'} handle={h} brand={cfg} />
-            </div>
-        );
-    }
-
-    // 본인이 보면 설정으로 가는 줄을 보여 준다 (본인 화면 = 마이페이지)
-    const { data: { user: authUser } } = await supabase.auth.getUser();
-    let isOwner = false;
-    if (authUser && row.id) {
-        const { data: me } = await supabase.from('members').select('id').eq('auth_id', authUser.id).maybeSingle();
-        isOwner = me?.id === row.id;
+        if (!isOwner) {
+            return (
+                <div className="min-h-screen bg-black text-white">
+                    <ProfileInvite variant={share ? 'expired' : 'private'} handle={h} brand={cfg} />
+                </div>
+            );
+        }
+        // 본인은 비공개여도 다른 사람에게 보일 모습을 미리 본다 (서버가 내보낼 값 그대로)
+        const { data: preview } = await supabase.rpc('preview_my_brand_profile', { p_brand: cfg.siteId });
+        if (!preview) notFound();
+        row = preview as BrandProfileRow;
     }
 
     return (
@@ -94,7 +100,7 @@ export default async function MadPublicProfilePage({ params, searchParams }: Pro
             )}
             {isOwner && (
                 <p className="max-w-3xl mx-auto px-6 pt-28 -mb-20 text-sm text-neutral-400">
-                    내 프로필입니다. 공개 항목은 <a href={cfg.myPath} className="underline underline-offset-4 text-white">마이페이지</a>에서 바꿀 수 있습니다.
+                    {isPublic ? '내 프로필입니다.' : '비공개 상태입니다. 나에게만 보이는 미리보기입니다.'} 공개 여부와 항목은 <a href={cfg.myPath} className="underline underline-offset-4 text-white">마이페이지</a>에서 바꿀 수 있습니다.
                 </p>
             )}
             <BrandPublicProfile
