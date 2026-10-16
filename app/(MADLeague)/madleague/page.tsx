@@ -6,7 +6,7 @@ import {
   fetchMadArticles,
 } from '@/lib/supabase/madleague';
 import { KoreaClubMap } from '@/features/madleague/KoreaClubMap';
-import { HeroRotatingTitle } from '@/features/madleague/HeroRotatingTitle';
+import { MadHomeHero } from '@/features/madleague/MadHomeHero';
 import { MAD_PROGRAMS } from '@/features/madleague/programs-list';
 import { madzineCategoryLabel } from '@/lib/madzine-categories';
 import NewsletterSubscribeForm from '@/components/newsletter/NewsletterSubscribeForm';
@@ -21,45 +21,12 @@ export default async function Page() {
 
   return (
     <div className="bg-[var(--mad-black,#000)] text-white">
-      {/* ─── Hero ─────────────────────────────────── */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#EC1D25]/20 via-black to-black" aria-hidden />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(236,29,37,0.15),transparent_50%)]" aria-hidden />
-        <div className="relative mx-auto max-w-7xl px-6 pt-24 pb-32 sm:pt-32 sm:pb-40">
-          <div className="flex items-center gap-3 text-[#EC1D25] font-bold tracking-widest text-xs mb-6">
-            <span className="h-px w-8 bg-[#EC1D25]" />
-            MATCH · ACTIVE · DEVELOP
-          </div>
-          <HeroRotatingTitle />
-          <p className="mt-8 max-w-xl text-lg text-neutral-300 leading-relaxed">
-            전국 마케팅 광고 동아리들의 경쟁을 통한 성장.
-            <br />
-            클라이언트의 실제 프로젝트를 제안하고 실행한다.
-            <br />
-            경력 같은 신입의 무대 - 매드리그
-          </p>
-          <div className="mt-10 flex flex-wrap gap-4">
-            <Link
-              href="/madleague/apply"
-              className="inline-flex items-center gap-2 bg-[#EC1D25] hover:bg-[#d01820] text-white font-bold px-8 py-4 transition"
-            >
-              매드리거 등록 <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/madleague/about"
-              className="inline-flex items-center gap-2 border border-neutral-600 hover:border-white text-white font-bold px-8 py-4 transition"
-            >
-              매드리그란
-            </Link>
-          </div>
-        </div>
-      </section>
+      <MadHomeHero />
 
       {/* ─── 동아리 지도 ─────────────────────────── */}
       <section className="bg-neutral-950 border-y border-neutral-900">
         <div className="mx-auto max-w-7xl px-6 py-32">
           <SectionHeader
-            eyebrow="CLUBS"
             title="공식 동아리"
             action={{ href: '/madleague/clubs', label: '동아리 전체 보기' }}
           />
@@ -119,7 +86,7 @@ export default async function Page() {
 
       {/* ─── 프로그램 ──────────────────────────────── */}
       <section className="mx-auto max-w-7xl px-6 py-32">
-        <SectionHeader eyebrow="PROGRAMS" title={<>실전 프로젝트로<br />경력 같은 신입으로</>} />
+        <SectionHeader title={<>실전 프로젝트로<br />경력 같은 신입으로</>} />
         <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {MAD_PROGRAMS.map((p) => (
             <ProgramCard key={p.href} href={p.href} title={p.title} desc={p.desc} featured={p.featured} />
@@ -132,7 +99,6 @@ export default async function Page() {
         <section className="bg-white text-neutral-900 border-y border-neutral-200">
           <div className="mx-auto max-w-7xl px-6 py-24">
             <SectionHeader
-              eyebrow="MADZINE"
               title="최신 콘텐츠"
               action={{ href: '/madleague/madzine', label: '매거진 전체' }}
               dark={false}
@@ -147,9 +113,9 @@ export default async function Page() {
                   <div className="aspect-[4/3] bg-neutral-100 overflow-hidden">
                     {a.thumbnail_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={a.thumbnail_url} alt={a.title} className="h-full w-full object-cover group-hover:scale-105 transition" />
+                      <img src={a.thumbnail_url} alt={a.title} className="h-full w-full object-cover" />
                     ) : (
-                      <div className="h-full w-full bg-gradient-to-br from-neutral-200 to-neutral-100 flex items-center justify-center text-neutral-400 text-xs tracking-widest">
+                      <div className="h-full w-full flex items-center justify-center text-neutral-400 text-sm">
                         {madzineCategoryLabel(a.category)}
                       </div>
                     )}
@@ -207,12 +173,10 @@ export default async function Page() {
 
 
 function SectionHeader({
-  eyebrow,
   title,
   action,
   dark = true,
 }: {
-  eyebrow: string;
   title: React.ReactNode;
   action?: { href: string; label: string };
   dark?: boolean;
@@ -220,8 +184,7 @@ function SectionHeader({
   return (
     <div className="flex items-end justify-between flex-wrap gap-4">
       <div>
-        <div className="text-xs font-bold tracking-widest text-[#EC1D25]">{eyebrow}</div>
-        <h2 className={`mt-2 text-4xl sm:text-6xl font-black tracking-tight ${dark ? 'text-white' : 'text-neutral-900'}`}>
+        <h2 className={`text-4xl sm:text-6xl font-black tracking-tight ${dark ? 'text-white' : 'text-neutral-900'}`}>
           {title}
         </h2>
       </div>

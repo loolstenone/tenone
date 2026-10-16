@@ -16,7 +16,8 @@ const COPIES: { top: string; accent: string }[] = [
 
 const INTERVAL_MS = 3000;
 
-export function HeroRotatingTitle() {
+/** sizeClass: 제목 글자 크기 (좌우 배치 시안처럼 폭이 좁은 곳에서 줄인다) */
+export function HeroRotatingTitle({ sizeClass = 'text-[2.5rem] sm:text-7xl lg:text-8xl' }: { sizeClass?: string } = {}) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export function HeroRotatingTitle() {
   }, []);
 
   return (
-    <h1 className="text-[2.5rem] sm:text-7xl lg:text-8xl font-black leading-tight tracking-tight break-keep text-balance">
+    <h1 className={`${sizeClass} font-black leading-tight tracking-tight break-keep text-balance`}>
       <span className="sr-only">{COPIES[0].top} {COPIES[0].accent}</span>
       <span className="grid" aria-hidden>
         {COPIES.map((c, i) => {

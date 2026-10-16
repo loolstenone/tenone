@@ -18,5 +18,10 @@ export const MAD_PROGRAM_IMAGES = {
     imBanner: madProgramAsset("im", "199b0a48b3817"),
     heroWide: madProgramAsset("hero", "bf978f83e29d6"),
     heroTall: madProgramAsset("hero", "a1ed9bf576277"),
+    /** ⚠️ 생성 이미지 (실제 현장 아님) — 새 화면에 쓰지 않는다 (2026-10-16) */
     ptHero: madProgramAsset("pt", "88dd025d720da"),
+    /** DAM 파티 시즌 2 발표 현장 — 실제 사진, 1024px 고화질본 (2026-10-16 사용자 제공, 우하단 표시 제거) */
+    damTalkHd: madProgramAsset("dam-history", "73ba05a743a0a-hd"),
+    /** 같은 장면에 MAD League 헬멧을 합성한 콘셉트 이미지 (1600px, 2026-10-16 사용자 제공) — 설명에 "현장 사진"으로 쓰지 않는다 */
+    damTalkHelmet: madProgramAsset("dam-history", "73ba05a743a0a-helmet"),
 };
