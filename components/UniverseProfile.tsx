@@ -10,6 +10,7 @@ import { getCapabilityAggregation, type CapabilityAggregation } from '@/lib/supa
 import { getAllSiteConfigs, type SiteConfigRow } from '@/lib/supabase/site-configs';
 import { createClient } from '@/lib/supabase/client';
 import { ServiceLinksPanel } from '@/components/ServiceLinksPanel';
+import { CrossSiteLink } from '@/components/CrossSiteLink';
 import { friendlyDbError } from '@/lib/profile/public-profile';
 import { JOB_FUNCTIONS, INDUSTRIES } from '@/lib/badak-constants';
 import type { TaxonomyKind } from '@/lib/supabase/taxonomies';
@@ -162,73 +163,55 @@ function PasswordField({ label, value, onChange }: { label: string; value: strin
 }
 
 /* ── 서비스 카드 ── */
-function ServiceCard({ siteId, siteName, color, serviceData, isClosed }: {
-    siteId: string; siteName: string; color: string;
+function ServiceCard({ siteId, siteName, serviceData, isClosed }: {
+    siteId: string; siteName: string;
     serviceData?: ServiceProfileData; isClosed?: boolean;
 }) {
+    // 색 띠·색 아이콘 칸·색 배경 칩 없이 — 브랜드 구분은 이름으로 충분하다 (2026-10-16 사용자 지적: AI 티)
     const meta = SERVICE_META[siteId];
     const Icon = meta?.icon || Globe;
     const summaryFields = serviceData?.fields
         ? Object.entries(serviceData.fields).filter(([, v]) => v != null && v !== '').slice(0, 3)
         : [];
+    const access = meta?.access ? `${ACCESS_LABELS[meta.access].label}${meta.accessDetail ? ` · ${meta.accessDetail}` : ''}` : '';
     return (
-        <div className="rounded-xl border tn-border tn-surface overflow-hidden hover:shadow-md transition-shadow group">
-            <div className="h-1" style={{ backgroundColor: color }} />
-            <div className="p-4">
-                <div className="flex items-start gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform"
-                        style={{ backgroundColor: color }}>
-                        <Icon className="h-5 w-5 text-white" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-bold tn-text">{siteName}</span>
-                            {isClosed && (
-                                <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-neutral-200 text-neutral-500">닫힘</span>
-                            )}
-                            {meta?.access && (() => {
-                                const a = ACCESS_LABELS[meta.access];
-                                const detail = meta.accessDetail ? ` · ${meta.accessDetail}` : '';
-                                return (
-                                    <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap"
-                                        style={{ backgroundColor: a.color + '15', color: a.color }}>
-                                        {a.label}{detail}
-                                    </span>
-                                );
-                            })()}
-                        </div>
-                        <p className="text-[11px] tn-text-sub leading-snug mt-0.5">{meta?.intro || meta?.desc}</p>
-                    </div>
-                </div>
-                {serviceData && (summaryFields.length > 0 || serviceData.joinedAt) && (
-                    <div className="grid grid-cols-2 gap-2 mb-3 p-3 rounded-lg bg-neutral-50">
-                        {serviceData.joinedAt && (
-                            <div className="flex items-center gap-1.5 text-[11px] tn-text-sub">
-                                <Clock className="h-3 w-3 shrink-0" />
-                                <span>{serviceData.joinedAt.substring(0, 10)} 등록</span>
-                            </div>
+        <div className="rounded-xl border tn-border p-4">
+            <div className="flex items-start gap-3 mb-2">
+                <Icon className="h-4 w-4 tn-text-sub shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                        <span className="text-sm font-bold tn-text">{siteName}</span>
+                        {(access || isClosed) && (
+                            <span className="text-[11px] tn-text-sub">{[access, isClosed && '닫힘'].filter(Boolean).join(' · ')}</span>
                         )}
-                        {summaryFields.map(([label, value]) => (
-                            <div key={label} className="flex items-center gap-1.5 text-[11px] tn-text-sub">
-                                <Zap className="h-3 w-3 shrink-0" style={{ color }} />
-                                <span className="truncate">{label}: {String(value)}</span>
-                            </div>
-                        ))}
                     </div>
-                )}
-                <div className="flex items-center gap-3">
-                    <a href={`/${siteId}`}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors hover:opacity-80"
-                        style={{ color }}>
-                        바로가기 <ExternalLink className="h-3 w-3" />
-                    </a>
-                    {serviceData && (
-                        <a href={`/${siteId}/my`}
-                            className="inline-flex items-center gap-1.5 text-xs font-medium tn-text-sub hover:opacity-80 transition-colors">
-                            마이페이지 <ExternalLink className="h-3 w-3" />
-                        </a>
-                    )}
+                    <p className="text-[11px] tn-text-sub leading-snug mt-0.5">{meta?.intro || meta?.desc}</p>
                 </div>
+            </div>
+            {serviceData && (summaryFields.length > 0 || serviceData.joinedAt) && (
+                <div className="space-y-1 mb-3 pl-7">
+                    {serviceData.joinedAt && (
+                        <p className="flex items-center gap-1.5 text-[11px] tn-text-sub">
+                            <Clock className="h-3 w-3 shrink-0" />
+                            {serviceData.joinedAt.substring(0, 10)} 등록
+                        </p>
+                    )}
+                    {summaryFields.map(([label, value]) => (
+                        <p key={label} className="text-[11px] tn-text-sub truncate">{label}: {String(value)}</p>
+                    ))}
+                </div>
+            )}
+            <div className="flex items-center gap-3 pl-7">
+                <CrossSiteLink href={`/${siteId}`}
+                    className="inline-flex items-center gap-1 text-xs font-semibold tn-text hover:underline">
+                    바로가기 <ExternalLink className="h-3 w-3" />
+                </CrossSiteLink>
+                {serviceData && (
+                    <CrossSiteLink href={`/${siteId}/my`}
+                        className="inline-flex items-center gap-1 text-xs tn-text-sub hover:underline">
+                        마이페이지 <ExternalLink className="h-3 w-3" />
+                    </CrossSiteLink>
+                )}
             </div>
         </div>
     );
@@ -1103,8 +1086,8 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
                 <div className="rounded-2xl border tn-border tn-surface overflow-hidden">
                     <button
                         onClick={() => setSitesOpen(o => !o)}
-                        className="w-full flex items-center justify-between px-6 py-4 hover:bg-neutral-50 transition-colors cursor-pointer">
-                        <span className="text-xs font-semibold text-neutral-700 flex items-center gap-2">
+                        className="w-full flex items-center justify-between px-6 py-4 hover:opacity-80 transition-opacity cursor-pointer">
+                        <span className="text-xs font-semibold tn-text flex items-center gap-2">
                             <Globe className="h-3.5 w-3.5 tn-text-sub" />
                             유니버스 서비스
                             <span className="font-normal tn-text-sub">({sortedSites.length})</span>
@@ -1122,7 +1105,6 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
                                         key={s.id}
                                         siteId={s.id}
                                         siteName={s.name}
-                                        color={s.color}
                                         serviceData={serviceProfiles.find(sp => sp.siteId === s.id)}
                                         isClosed={siteConfigsLoaded && !openSiteIds.has(s.id)}
                                     />
