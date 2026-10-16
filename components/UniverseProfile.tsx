@@ -1019,10 +1019,6 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
                         community: '커뮤니티', meetup: '밋업', club: '클럽', portfolio: '포트폴리오',
                         membership: '멤버십', course: '코스', showcase: '쇼케이스', subscription: '구독', purchase: '구매',
                     };
-                    const CAP_COLOR: Record<string, string> = {
-                        community: '#22c55e', meetup: '#f59e0b', club: '#8b5cf6', portfolio: '#3b82f6',
-                        membership: '#6366f1', course: '#14b8a6', showcase: '#ec4899', subscription: '#3b82f6', purchase: '#f59e0b',
-                    };
                     const grouped = capabilityRoles.reduce<Record<string, CapabilityAggregation[]>>((acc, r) => {
                         (acc[r.brand_id] ??= []).push(r);
                         return acc;
@@ -1039,16 +1035,13 @@ export function UniverseProfile({ isOwner = true, publicData, children, preview 
                                         <div key={brandId} className="flex items-center gap-2 flex-wrap">
                                             <span className="text-[11px] font-semibold tn-text w-20 shrink-0">{brandName}</span>
                                             <div className="flex flex-wrap gap-1">
-                                                {roles.map(r => {
-                                                    const color = CAP_COLOR[r.capability_key] ?? '#6b7280';
-                                                    return (
-                                                        <span key={r.capability_key + r.role}
-                                                            className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-                                                            style={{ backgroundColor: color + '18', color }}>
-                                                            {CAPABILITY_KO[r.capability_key] ?? r.capability_key} · {r.role}
-                                                        </span>
-                                                    );
-                                                })}
+                                                {/* 색 배경 칩 없이 다른 칩과 같은 테두리 칩 (2026-10-16 사용자 지시) */}
+                                                {roles.map(r => (
+                                                    <span key={r.capability_key + r.role}
+                                                        className="text-[11px] px-2.5 py-0.5 rounded-full border tn-border tn-text">
+                                                        {CAPABILITY_KO[r.capability_key] ?? r.capability_key} · {r.role}
+                                                    </span>
+                                                ))}
                                             </div>
                                         </div>
                                     );
