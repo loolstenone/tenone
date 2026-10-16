@@ -164,7 +164,14 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
                     { label: "인증서 발급", path: "/madleague/certificate/issue" },
                 ],
             },
-            { placement: "header", label: "MADzine", path: "/madleague/madzine", source: { kind: "table", table: "mad_articles", pendingEq: { status: "pending_review" } }, adminHref: "/intra/ums/madleague/articles", unit: "글" },
+            {
+                placement: "header", label: "MADzine", path: "/madleague/madzine", source: { kind: "table", table: "mad_articles", pendingEq: { status: "pending_review" } }, adminHref: "/intra/ums/madleague/articles", unit: "글",
+                // 옛 madleague.net 매드진 하위 '공모전/프로젝트'(pinboard) 이전 (2026-10-16)
+                dropdown: [
+                    { label: "공모전/프로젝트", path: "/madleague/madzine/contest" },
+                ],
+            },
+            { placement: "feature", location: "MADzine", label: "공모전/프로젝트", path: "/madleague/madzine/contest", source: { kind: "board", board: "contest" }, adminHref: "/intra/ums/madleague/contest", unit: "글" },
             // 동아리 = 매드리거 하위 메뉴 (2026-10-08 사용자 결정 — 동아리 목록에서 각 동아리 소개 페이지로)
             { placement: "feature", location: "매드리거", label: "동아리", path: "/madleague/clubs", source: { kind: "table", table: "mad_clubs", eq: { status: "active" } }, adminHref: "/intra/ums/madleague/officers", unit: "개" },
             // 동아리 부원 공동 모집 (2026-10-10) — 동아리별 지원서 = forms program club-recruit:{slug}, 응답은 동아리 운영진이 /clubs/{slug}/manage에서
