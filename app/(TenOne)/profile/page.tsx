@@ -12,7 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 /**
- * 내 프로필 (Ten:One 계정 하나의 프로필) — 2026-10-16 개편
+ * 마이 페이지 (Ten:One 계정 하나의 프로필) — 계정 메뉴 이름과 같게 '마이 페이지'로 고정 — 2026-10-16 개편
  * 왼쪽 = 프로필 내용(이름·사진·소개… 모든 서비스가 같은 값을 쓴다) · 오른쪽 = 공개 설정(다른 사람에게 어떻게 보일지)
  */
 export default function ProfilePage() {
@@ -31,11 +31,11 @@ export default function ProfilePage() {
                 <ArrowLeft className="h-4 w-4" /> 홈으로
             </Link>
             <header className="mt-6 mb-8">
-                <h1 className="text-2xl font-bold tn-text">내 프로필</h1>
+                <h1 className="text-2xl font-bold tn-text">마이 페이지</h1>
                 <p className="mt-2 text-sm tn-text-sub leading-relaxed">
                     Ten:One 계정 하나의 프로필입니다. 여기서 고친 이름·사진·소개는 모든 서비스에 똑같이 쓰입니다.
                     <br className="hidden sm:block" />
-                    다른 사람에게 보일지, 무엇을 보일지는 오른쪽 공개 설정에서 정합니다.
+                    다른 사람에게 보일지, 무엇을 보일지는 공개 설정에서 정합니다.
                 </p>
             </header>
 

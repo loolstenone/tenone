@@ -93,9 +93,10 @@ export function AccountMenu({ profilePath, siteId, mode = "dropdown", placement 
             </div>
 
             <div className={section}>
-                {profilePath && <Link href={profilePath} onClick={close} className={row}>마이페이지</Link>}
+                {/* 이름은 '마이 페이지'로 고정 (2026-10-16 사용자 지시). TenOne처럼 마이 페이지가 곧 /profile이면 한 줄만 */}
+                {profilePath && <Link href={profilePath} onClick={close} className={row}>마이 페이지</Link>}
                 {/* 공개 프로필은 따로 두지 않는다 — 내용 수정·공개 여부·주소·공유를 한 화면에서 (2026-10-16) */}
-                <Link href="/profile" onClick={close} className={row}>Ten:One 프로필 · 계정</Link>
+                {profilePath !== "/profile" && <Link href="/profile" onClick={close} className={row}>Ten:One 프로필 · 계정</Link>}
             </div>
 
             {services && services.length > 0 && (
