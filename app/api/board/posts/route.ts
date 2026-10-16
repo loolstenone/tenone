@@ -93,8 +93,8 @@ export async function POST(request: NextRequest) {
             }
             const input: CreatePostInput = auth.isStaff
                 ? body
-                // 회원: 고정·임의 상태 지정 불가 (발행 또는 임시저장만)
-                : { ...body, isPinned: false, status: body.status === 'draft' ? 'draft' : 'published' };
+                // 회원: 고정·임의 상태 지정 불가 (발행 또는 임시저장만) · 검토 게시판은 발행 대신 '검토 대기'
+                : { ...body, isPinned: false, status: body.status === 'draft' ? 'draft' : rule.review ? 'pending' : 'published' };
             post = await boardDb.createPost(input, rule, { memberId: auth.memberId });
         }
 

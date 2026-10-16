@@ -61,10 +61,16 @@ async function update(request: NextRequest, { params }: Ctx) {
         if (allowed instanceof NextResponse) return allowed;
 
         const body = await request.json() as UpdatePostInput;
-        const input: UpdatePostInput = allowed.isStaff
+        let input: UpdatePostInput = allowed.isStaff
             ? body
             // 회원: 고정 불가, 상태는 발행·임시저장만
             : { ...body, isPinned: undefined, status: body.status && body.status !== 'published' && body.status !== 'draft' ? undefined : body.status };
+        // 검토 게시판: 회원이 고치면 다시 '검토 대기' (승인 뒤 내용을 바꿔 게시하는 것 방지)
+        if (!allowed.isStaff) {
+            const current = await boardDb.fetchPostById(id);
+            const rule = current ? await boardDb.fetchBoardRule(current.site, current.board) : null;
+            if (rule?.review) input = { ...input, status: input.status === 'draft' ? 'draft' : 'pending' };
+        }
         const post = await boardDb.updatePost(id, input);
         return NextResponse.json(post);
     } catch (error) {

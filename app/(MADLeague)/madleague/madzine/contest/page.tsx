@@ -29,6 +29,11 @@ export default async function ContestListPage({ searchParams }: { searchParams: 
                 <div className="py-14 sm:py-20 text-center">
                     <h1 className={`text-5xl sm:text-7xl font-black tracking-tight ${MZ_SERIF}`}>공모전/프로젝트</h1>
                     <p className={`mt-6 text-lg text-neutral-400 ${MZ_SERIF}`}>마케팅·광고 공모전과 대학생 프로젝트 소식</p>
+                    {/* 외부 기관·사람이 올리는 게시판 — 운영진 확인 후 게시 */}
+                    <Link href="/madleague/madzine/contest/write"
+                        className={`mt-8 inline-block border border-white/30 px-6 py-3 ${MZ_KICKER} text-white hover:border-[#EC1D25] hover:text-[#EC1D25] transition`}>
+                        + 소식 올리기
+                    </Link>
                 </div>
             </header>
 

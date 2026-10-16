@@ -44,6 +44,18 @@ export default async function ContestPostPage({ params }: Props) {
                 </div>
             </header>
             <div className="mx-auto max-w-2xl px-6 pb-24">
+                {(post.deadline || post.link) && (
+                    <dl className={`mb-12 grid gap-3 border-b ${MZ_RULE} pb-8 text-sm`}>
+                        {post.deadline && (
+                            <div className="flex gap-6"><dt className="w-20 shrink-0 text-neutral-500">접수 마감</dt><dd className="text-white">{post.deadline.replace(/-/g, '.')}</dd></div>
+                        )}
+                        {post.link && (
+                            <div className="flex gap-6"><dt className="w-20 shrink-0 text-neutral-500">자세히</dt>
+                                <dd className="min-w-0"><a href={post.link} target="_blank" rel="noopener noreferrer nofollow" className="text-white underline underline-offset-4 break-all hover:text-[#EC1D25]">{post.link}</a></dd>
+                            </div>
+                        )}
+                    </dl>
+                )}
                 <MadzineArticleBody content={post.body} />
                 <div className={`mt-16 pt-8 border-t ${MZ_RULE}`}>
                     <Link href="/madleague/madzine/contest" className="text-sm text-neutral-400 hover:text-white underline underline-offset-4">목록으로</Link>

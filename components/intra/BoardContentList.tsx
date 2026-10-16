@@ -16,8 +16,9 @@ const STATUS_BADGE: Record<string, string> = {
     draft: "bg-neutral-100 text-neutral-500",
     published: "bg-emerald-50 text-emerald-700",
     hidden: "bg-amber-50 text-amber-600",
+    pending: "bg-red-50 text-red-600",
 };
-const STATUS_LABEL: Record<string, string> = { draft: "임시", published: "발행", hidden: "숨김" };
+const STATUS_LABEL: Record<string, string> = { draft: "임시", published: "발행", hidden: "숨김", pending: "검토 대기" };
 
 interface Props {
     site: string;
@@ -59,6 +60,16 @@ export function BoardContentList({ site, board, title, description, editPath, pu
         setPosts(prev => prev.filter(p => p.id !== id));
     };
 
+    /** 검토 대기 글 승인(발행)·반려(숨김) — 외부 등록 게시판 (options.review) */
+    const review = async (id: string, status: "published" | "hidden") => {
+        if (status === "hidden" && !confirm("반려하면 사이트에 게시되지 않습니다. 반려할까요?")) return;
+        const res = await fetch(`/api/board/posts/${id}`, {
+            method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }),
+        });
+        if (!res.ok) { alert("처리하지 못했습니다."); return; }
+        setPosts(prev => prev.map(p => (p.id === id ? { ...p, status } : p)));
+    };
+
     const term = search.trim().toLowerCase();
     const filtered = posts
         .filter(p => statusFilter === "전체" || p.status === statusFilter)
@@ -91,6 +102,7 @@ export function BoardContentList({ site, board, title, description, editPath, pu
                     <option value="published">발행</option>
                     <option value="draft">임시</option>
                     <option value="hidden">숨김</option>
+                    <option value="pending">검토 대기</option>
                 </select>
                 <span className="text-xs text-neutral-400 ml-auto">{filtered.length}건</span>
             </div>
@@ -137,6 +149,14 @@ export function BoardContentList({ site, board, title, description, editPath, pu
                                     <td className="px-5 py-2.5 text-right text-neutral-400">{p.view_count.toLocaleString()}</td>
                                     <td className="px-5 py-2.5 text-right">
                                         <div className="flex items-center justify-end gap-1">
+                                            {p.status === "pending" && (
+                                                <>
+                                                    <button onClick={() => review(p.id, "published")}
+                                                        className="px-2.5 py-1 text-xs rounded-lg bg-neutral-900 text-white hover:bg-neutral-700">승인</button>
+                                                    <button onClick={() => review(p.id, "hidden")}
+                                                        className="px-2.5 py-1 text-xs rounded-lg border border-neutral-300 text-neutral-600 hover:bg-neutral-50">반려</button>
+                                                </>
+                                            )}
                                             <button onClick={() => router.push(`${editPath}?id=${p.id}`)} title="수정"
                                                 className="p-1.5 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg">
                                                 <Pencil className="h-3.5 w-3.5" />

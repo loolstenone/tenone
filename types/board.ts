@@ -53,7 +53,8 @@ export interface BoardConfig {
 
 // ── 게시글 ──
 
-export type PostStatus = 'published' | 'draft' | 'hidden' | 'deleted';
+/** pending = 검토 대기 (외부 등록 게시판 options.review — 직원 승인 시 published) */
+export type PostStatus = 'published' | 'draft' | 'hidden' | 'deleted' | 'pending';
 export type AuthorType = 'member' | 'guest' | 'admin' | 'agent';
 
 export interface Post {
@@ -176,6 +177,8 @@ export interface CreatePostInput {
     guestEmail?: string;
     // 첨부파일 ID (미리 업로드 후)
     attachmentIds?: string[];
+    /** 게시판별 부가 정보 (예: 공모전 주최·접수 마감·안내 링크) — 문자열 값만, 저장 시 정리 */
+    extraFields?: Record<string, string>;
 }
 
 export interface UpdatePostInput {

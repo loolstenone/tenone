@@ -13,8 +13,11 @@ export interface ContestPost {
     body: string;
     category: string | null;
     image: string | null;
+    /** 표시용 작성 기관 — 외부 등록 글은 입력한 주최·주관 (개인 이름은 보이지 않는다), 이전 글은 원본 작성자 */
     authorName: string | null;
     publishedAt: string | null;
+    deadline: string | null;
+    link: string | null;
 }
 
 function anon() {
@@ -26,14 +29,18 @@ function anon() {
 interface Row {
     id: string; slug: string | null; title: string; summary: string | null; body: string | null;
     category_id: string | null; image: string | null; author_name: string | null; published_at: string | null;
+    extra_fields: { organizer?: string; deadline?: string; link?: string } | null;
 }
 
 const toPost = (r: Row): ContestPost => ({
     id: r.id, slug: r.slug ?? r.id, title: r.title, summary: r.summary, body: r.body ?? '',
-    category: r.category_id, image: r.image, authorName: r.author_name, publishedAt: r.published_at,
+    category: r.category_id, image: r.image,
+    authorName: r.extra_fields?.organizer ?? r.author_name, publishedAt: r.published_at,
+    deadline: r.extra_fields?.deadline ?? null,
+    link: r.extra_fields?.link && /^https?:\/\//.test(r.extra_fields.link) ? r.extra_fields.link : null,
 });
 
-const COLUMNS = 'id, slug, title, summary, body, category_id, image, author_name, published_at';
+const COLUMNS = 'id, slug, title, summary, body, category_id, image, author_name, published_at, extra_fields';
 
 async function boardId(): Promise<string | null> {
     const { data } = await anon()
@@ -58,7 +65,9 @@ export async function getContestPosts(opts: { category?: string } = {}): Promise
 export async function getContestPost(slug: string): Promise<ContestPost | null> {
     const id = await boardId();
     if (!id) return null;
+    // 이전 글 = slug(mp-…) · 회원이 올린 글 = slug 없음 → id로 연다
+    const isUuid = /^[0-9a-f-]{36}$/i.test(slug);
     const { data } = await anon().from('ums_posts').select(COLUMNS).eq('board_id', id).eq('status', 'published')
-        .eq('slug', slug).maybeSingle();
+        .eq(isUuid ? 'id' : 'slug', slug).maybeSingle();
     return data ? toPost(data as Row) : null;
 }

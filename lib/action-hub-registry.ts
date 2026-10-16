@@ -160,6 +160,17 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         priority: "critical",
     },
     {
+        // 외부 등록 게시판(options.review) 검토 대기 — 지금은 MAD League 공모전/프로젝트뿐 (2026-10-16)
+        key: "board_posts_pending",
+        label: "공모전/프로젝트 검토 대기",
+        table: "ums_posts",
+        filter: { column: "status", value: "pending" },
+        href: "/intra/ums/madleague/contest",
+        brand_id: "madleague",
+        category: "moderation",
+        priority: "high",
+    },
+    {
         key: "profile_reports",
         label: "프로필 신고",
         table: "profile_reports",

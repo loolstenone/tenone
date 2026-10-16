@@ -77,13 +77,15 @@ export interface BoardRule {
     allowComments: boolean;
     /** public = 누구나 / 그 외(intra·staff) = 직원 전용 게시판 */
     visibility: string;
+    /** options.review — 회원 글은 '검토 대기'로 들어가고 직원이 승인해야 게시 (외부 등록 게시판) */
+    review: boolean;
 }
 
 /** 게시판 쓰기 규칙 (site slug + board slug) */
 export async function fetchBoardRule(site: string, board: string): Promise<BoardRule | null> {
     const { data } = await supabase
         .from('ums_boards')
-        .select('id, site_id, write_permission, comment_permission, allow_comments, visibility, ums_sites!inner(slug)')
+        .select('id, site_id, write_permission, comment_permission, allow_comments, visibility, options, ums_sites!inner(slug)')
         .eq('slug', board)
         .eq('ums_sites.slug', site)
         .maybeSingle();
@@ -95,6 +97,7 @@ export async function fetchBoardRule(site: string, board: string): Promise<Board
         commentPermission: data.comment_permission,
         allowComments: data.allow_comments !== false,
         visibility: data.visibility,
+        review: (data.options as { review?: boolean } | null)?.review === true,
     };
 }
 
@@ -276,6 +279,15 @@ export async function fetchPostWithDetails(id: string, memberId?: string): Promi
 }
 
 /** 게시글 작성 — 호출 전에 게시판 쓰기 권한 확인 필수 (API 라우트) */
+/** 부가 정보: 영문 키·문자열 값만, 키 10개·값 300자까지 (외부 작성자 입력이므로 크기 제한) */
+function cleanExtraFields(raw: Record<string, unknown> | undefined): Record<string, string> {
+    const out: Record<string, string> = {};
+    for (const [k, v] of Object.entries(raw ?? {}).slice(0, 10)) {
+        if (/^[a-z_]{1,30}$/.test(k) && typeof v === 'string' && v.trim()) out[k] = v.trim().slice(0, 300);
+    }
+    return out;
+}
+
 export async function createPost(
     input: CreatePostInput,
     rule: BoardRule,
@@ -301,6 +313,7 @@ export async function createPost(
         // 회원 글은 이름을 복사하지 않는다 (members 조인). 비회원 작성자(에이전트 등)만 표기명 저장
         author_name: author.memberId ? null : (author.displayName ?? null),
         published_at: status === 'published' ? new Date().toISOString() : null,
+        extra_fields: cleanExtraFields(input.extraFields),
     };
 
     const { data, error } = await supabase.from('ums_posts').insert(row).select('id').single();
