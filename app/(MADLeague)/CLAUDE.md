@@ -89,7 +89,7 @@
 | `features/madleague/ProgramCTA.tsx` | 상세 하단 참여 CTA 통일 — 공개 신청서(forms.program=key) 있으면 그 버튼, 없으면 매드리거 등록 · 문의하기(`?type=program`) · corporate면 기업 참여 문의(`?type=corporate`) · `primary`로 페이지 안 폼 앵커 덮어쓰기(히어로) |
 | `features/madleague/ProgramsSubNav.tsx` | **섹션 하위 탭 줄** (헤더 아래 고정) — 브랜드 레이아웃이 한 번 렌더, 경로로 섹션 판단 (2026-10-11 통일): 프로그램(programs-list, 경쟁 PT 제외·그 페이지엔 없음) · 매드리거(홈·동아리·공동 모집·매드리거 등록·인증서 발급, /clubs/{slug} 하위는 동아리 활성). `programs/layout.tsx` 삭제 |
 | `features/madleague/SectionPager.tsx` | **섹션 하단 좌우 이동 공용** (2026-10-11): 프로그램 상세 이전·다음(`ProgramNeighbors`) + 매드리거 메뉴 페이지 5개(`MadleaguerPager`, 순서 = 헤더 레지스트리 매드리거 상위+하위, 순환). 모바일도 한 줄 좌·가운데·우 같은 높이. 가운데 홈 링크는 좌우와 겹치면 숨김 |
-| `features/madleague/MadHomeHero.tsx` | **홈 첫 화면** (2026-10-16 A안): 왼쪽 슬라이딩 카피 + 설명 + "경력 같은 신입의 무대, 매드리그" + 매드리거 등록·경쟁 PT 알아보기(공개 소개 페이지 — `/madleague/pt`는 매드리거 전용이라 첫 화면 링크로 쓰지 않음), 오른쪽 헬멧 합성 발표 사진(`damTalkHelmet`, 설명에 "합성" 표기). 그라데이션·빛 번짐·영문 머리말 없음 |
+| `features/madleague/MadHomeHero.tsx` | **홈 첫 화면** (2026-10-16 A안): 왼쪽 슬라이딩 카피 + 설명 + "경력 같은 신입의 무대, 매드리그" + 매드리거 등록·경쟁 PT 알아보기(공개 소개 페이지 — `/madleague/pt`는 매드리거 전용이라 첫 화면 링크로 쓰지 않음), 오른쪽 헬멧 합성 발표 사진(`damTalkHelmet`, 사진 설명 문구 없음 — 사용자 지시). 그라데이션·빛 번짐·영문 머리말 없음 |
 | `features/madleague/HeroRotatingTitle.tsx` | 홈 히어로 카피 4종 3초 슬라이딩 (사용자 유지 결정) · `sizeClass`로 크기 조절 |
 | `app/(MADLeague)/madleague/programs/hero·rookie·planners/` | **연계 프로그램** (`PartnerProgramPage`) — 옛 `/madleague/hero` → 308. MADLeague 자체 HeRo 신청 폼·`/api/madleague/hero` 삭제(2026-10-09) |
 | `app/(MADLeague)/madleague/apply/` | 지원서 (로그인·캡차·동의) |

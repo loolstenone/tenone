@@ -1,7 +1,7 @@
 /**
  * MAD League 홈 첫 화면 (2026-10-16 사용자 결정 A안 — "AI로 만든 느낌" 개선)
  * 그라데이션·빛 번짐·영문 머리말 없음. 슬라이딩 카피(HeroRotatingTitle)는 유지 (사용자 지시 "처음처럼 슬라이딩").
- * 사진 = DAM 파티 시즌 2 발표 장면에 헬멧을 합성한 콘셉트 이미지 — 이 화면에만 쓴다 (사용자 지시 "반복 사용하지 마")
+ * 사진 = DAM 파티 시즌 2 발표 장면에 헬멧을 합성한 콘셉트 이미지 — 이 화면에만 쓴다 (사용자 지시 "반복 사용하지 마"), 사진 설명 문구 없음 (사용자 지시)
  */
 import Image from 'next/image';
 import Link from 'next/link';
@@ -27,13 +27,10 @@ export function MadHomeHero() {
                         </Link>
                     </div>
                 </div>
-                <figure>
-                    <div className="relative aspect-[4/3] w-full">
-                        <Image src={MAD_PROGRAM_IMAGES.damTalkHelmet} alt="MAD League 헬멧을 쓴 발표 장면 (합성)" fill priority
-                            sizes="(min-width: 1024px) 600px, 100vw" className="object-cover" />
-                    </div>
-                    <figcaption className="mt-3 text-xs text-neutral-500">DAM 파티 시즌 2 발표 세션 · 헬멧 합성</figcaption>
-                </figure>
+                <div className="relative aspect-[4/3] w-full">
+                    <Image src={MAD_PROGRAM_IMAGES.damTalkHelmet} alt="MAD League 헬멧을 쓰고 발표를 듣는 매드리거들" fill priority
+                        sizes="(min-width: 1024px) 600px, 100vw" className="object-cover" />
+                </div>
             </div>
         </section>
     );
