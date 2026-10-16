@@ -514,7 +514,7 @@ import { MyProfileCard } from "@/components/MyProfileCard";
 - 비공개 공유 = 기한 있는 링크 (`?s=토큰`, 1·7·30일, 10개, 회수 가능, DB엔 해시만) · 방문 수 = 하루 집계만 · 신고 → 인트라 › 통합 회원 › 프로필 신고 (Action Hub) → 운영 숨김(`profile_blocked_at`, service_role만)
 - **브랜드 My Profile** (P2, 2026-10-16 — `sql/profile-p2-brand.sql`): 브랜드 도메인 `/@핸들` → middleware가 `lib/profile/brand-profiles.ts` 등록 브랜드면 `/{brand}/u/{핸들}` (그 외 도메인은 유니버스 `/profile/{핸들}`). 공개 = `member_brand_profile_settings`(그 브랜드 가입 회원만·만 14세) · 공개 항목 = DB `brand_profile_payload` 한 곳 · 브랜드 섹션 = 그 브랜드 소유 함수(`madleague_profile_section`) · 다른 브랜드 활동 = 본인이 체크한 브랜드만(체크 = 동의, `include_consent_at`) · 유니버스 프로필 링크는 본인 화면에만. 설정 화면 `components/profile/BrandProfilePanel.tsx`(브랜드 마이페이지) · 브랜드만 탈퇴 → 설정·공유 링크 자동 정리
   - 브랜드 추가 3곳: `BRAND_PROFILES` · DB `brand_profile_enabled`·`brand_profile_section` + `{brand}_profile_section()` · `app/({Brand})/{brand}/u/[handle]/`(page·layout·not-found·opengraph-image)
-- **화면 구성** (2026-10-16 개편): `/profile` = 왼쪽 프로필 **내용**(이름·사진·소개, `UniverseProfile`) + 오른쪽 **공개 설정** 패널(`components/profile/ProfileVisibilityRail.tsx` — 공개 여부·주소(핸들) 만들기·보일 항목·검색 노출·미리보기·공유·방문 수). 공개·공유는 기능 설정이라 내용 흐름에 섞지 않는다. 핸들은 이 패널에서만 바꾼다 (프로필 수정 화면에 없음)
+- **화면 구성** (2026-10-16 개편): `/profile` = 왼쪽 프로필 **내용**(이름·사진·소개, `UniverseProfile`) + 오른쪽 **공개 설정** 패널(`components/profile/ProfileVisibilityRail.tsx` — 공개 여부·주소(핸들) 만들기·보일 항목·검색 노출·미리보기·공유·방문 수). 공개·공유는 기능 설정이라 내용 흐름에 섞지 않는다. 핸들은 이 패널에서만 바꾼다 (프로필 수정 화면에 없음). **브랜드 마이페이지도 같은 구조** — 오른쪽 `BrandProfilePanel`, 부품 공용 `components/profile/RailParts.tsx`(스위치·구획·주소 편집기). 보일 항목에 관심 분야 포함 (`sql/profile-interests-toggle.sql`)
 - ❌ 카드 위·옆 얇은 색 띠, 색 배경 칩, 그라데이션 배너 (AI 티 — 2026-10-16 사용자 지적) ❌ 미리보기·비공개 화면에 공유 버튼
 - ❌ 화면에서 공개 항목을 따로 고르기 (DB 함수 우회) ❌ 핸들로 로그인·이메일 조회 ❌ 다른 브랜드 활동을 본인 동의 없이 공개 프로필에 노출
 

@@ -117,7 +117,10 @@ export default function MadLeagueMyPage() {
 
     return (
         <div className="min-h-screen bg-black text-white">
-            <div className="max-w-4xl mx-auto px-6 pt-24 pb-4">
+            {/* 왼쪽 = 내 MADLeague (프로필·동아리·상태·바로가기) · 오른쪽 = 공개 프로필 설정 (넓은 화면에서 따라 내려옴) — 2026-10-16 */}
+            <div className="max-w-6xl mx-auto px-6 pt-24 pb-16 grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+            <div className="min-w-0">
+            <div className="pb-4">
                 {/* 공통 프로필 카드 + MADLeague 특화 정보 */}
                 {user?.id && (
                     <div className="mb-4">
@@ -194,7 +197,7 @@ export default function MadLeagueMyPage() {
                 )}
             </div>
 
-            <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+            <div className="py-4 space-y-6">
 
                 {/* 동아리 운영진 패널 — 대기 지원서 바로 처리 */}
                 {isPresident && (
@@ -249,12 +252,6 @@ export default function MadLeagueMyPage() {
                     </Link>
                 )}
 
-                {/* 공개 프로필 (www.madleague.net/@핸들) — 공개·보일 항목·다른 활동·공유 링크 */}
-                <div className="mt-10 mb-10">
-                    <BrandProfilePanel cfg={BRAND_PROFILES.madleague}
-                        renderSection={section => <MadProfileSection section={section as MadSection} basePath="/madleague" />} />
-                </div>
-
                 {/* 로그아웃 */}
                 <button
                     onClick={() => { logout(); router.push('/'); }}
@@ -262,6 +259,14 @@ export default function MadLeagueMyPage() {
                 >
                     <LogOut className="h-4 w-4" /> 로그아웃
                 </button>
+            </div>
+            </div>
+
+            {/* 공개 프로필 설정 (www.madleague.net/@핸들) */}
+            <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
+                <BrandProfilePanel cfg={BRAND_PROFILES.madleague}
+                    renderSection={section => <MadProfileSection section={section as MadSection} basePath="/madleague" />} />
+            </div>
             </div>
         </div>
     );
