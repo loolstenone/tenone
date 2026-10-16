@@ -14,6 +14,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ChevronRight, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -147,7 +148,9 @@ export function AccountMenu({ profilePath, siteId, mode = "dropdown", placement 
                 </div>
             )}
 
-            {open && mode === "sheet" && (
+            {/* 시트는 body에 그린다 — 헤더에 backdrop-blur·transform이 있으면 fixed가 화면이 아니라 헤더 기준이 되어
+                위쪽에 잘린 흰 상자로 뜬다 (2026-10-16 tenone.biz 마이 페이지) */}
+            {open && mode === "sheet" && typeof document !== "undefined" && createPortal(
                 <>
                     <div className="fixed inset-0 z-[9998] bg-black/50" onClick={close} aria-hidden="true" />
                     <div role="menu" className="fixed inset-x-0 bottom-0 z-[9999] max-h-[80vh] overflow-y-auto rounded-t-2xl bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl">
@@ -156,7 +159,8 @@ export function AccountMenu({ profilePath, siteId, mode = "dropdown", placement 
                         </div>
                         {body}
                     </div>
-                </>
+                </>,
+                document.body,
             )}
         </div>
     );
