@@ -8,7 +8,6 @@ import { ProfileVisibilityRail } from "@/components/profile/ProfileVisibilityRai
 import { ProfileComments } from "@/components/ProfileComments";
 import { UCBalanceCard } from "@/components/UCBalanceCard";
 import { UC_PUBLIC } from "@/lib/uc-visibility";
-import HeroBadgeOptIn from "@/features/hero/HeroBadgeOptIn";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -51,7 +50,6 @@ export default function ProfilePage() {
                             />
                         )}
                     </UniverseProfile>
-                    {user?.id && <HeroBadgeOptIn memberId={user.id} />}
                     {UC_PUBLIC && <UCBalanceCard />}
                 </div>
                 {/* 넓은 화면: 오른쪽에 따라 내려오는 패널 · 모바일: 프로필 아래 */}
