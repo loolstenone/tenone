@@ -157,16 +157,24 @@ export default async function MadzinePage({ searchParams }: PageProps) {
                   const articleClub = a.club_id ? clubById.get(a.club_id) : null;
                   return (
                     <li key={a.id} className={`border-b ${MZ_RULE}`}>
-                      <Link href={`/madleague/madzine/${a.slug}`} className="group grid grid-cols-12 items-baseline gap-4 py-6">
-                        <span className={`col-span-2 sm:col-span-1 text-2xl italic text-neutral-600 group-hover:text-[#EC1D25] transition ${MZ_DISPLAY}`}>
+                      <Link href={`/madleague/madzine/${a.slug}`} className="group flex items-center gap-4 sm:gap-6 py-5">
+                        <span className={`w-9 sm:w-12 shrink-0 text-2xl italic text-neutral-600 group-hover:text-[#EC1D25] transition ${MZ_DISPLAY}`}>
                           {String(picks.length + i + 1).padStart(2, '0')}
                         </span>
-                        <span className={`hidden sm:block col-span-2 ${MZ_KICKER} text-[#EC1D25]`}>{madzineCategoryLabel(a.category)}</span>
-                        <span className={`col-span-10 sm:col-span-6 text-lg leading-snug text-white group-hover:text-[#EC1D25] transition ${MZ_SERIF}`}>
+                        {/* 작은 미리보기 — 없으면 빈 칸 (줄 정렬 유지) */}
+                        <span className="w-20 sm:w-28 aspect-[4/3] shrink-0 overflow-hidden bg-neutral-900">
+                          {a.thumbnail_url && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={a.thumbnail_url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                          )}
+                        </span>
+                        <span className={`hidden sm:block w-24 shrink-0 ${MZ_KICKER} text-[#EC1D25]`}>{madzineCategoryLabel(a.category)}</span>
+                        <span className={`flex-1 min-w-0 text-lg leading-snug text-white group-hover:text-[#EC1D25] transition ${MZ_SERIF}`}>
+                          <span className={`sm:hidden block mb-1 ${MZ_KICKER} text-[#EC1D25]`}>{madzineCategoryLabel(a.category)}</span>
                           {a.title}
                         </span>
-                        <span className="hidden sm:block col-span-1 text-xs text-neutral-500">{articleClub?.name ?? ''}</span>
-                        <span className="hidden sm:block col-span-2 text-right text-[11px] tracking-[0.2em] text-neutral-500">{formatMzDate(a.published_at)}</span>
+                        <span className="hidden md:block w-24 shrink-0 text-xs text-neutral-500">{articleClub?.name ?? ''}</span>
+                        <span className="hidden sm:block w-28 shrink-0 text-right text-[11px] tracking-[0.2em] text-neutral-500">{formatMzDate(a.published_at)}</span>
                       </Link>
                     </li>
                   );
