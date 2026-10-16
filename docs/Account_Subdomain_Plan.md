@@ -1,8 +1,8 @@
 # 계정 관리 → account.tenone.biz 이전 계획
 
-> 작성 2026-10-16 (세션 179) · 상태: **코드 적용 (배포 전)** — 외부 작업 완료: Vercel에 account·admin·mypage.tenone.biz 연결(Valid), 가비아 DNS, Supabase Redirect URLs 3개
+> 작성 2026-10-16 (세션 179) · 상태: **코드 적용 (배포 전)** — 외부 작업 완료: Vercel에 account·mypage.tenone.biz 연결(Valid) — admin.tenone.biz는 쓰지 않는다(사용자 지시, Vercel 연결·DNS·Supabase Redirect URL 해제 대상), 가비아 DNS, Supabase Redirect URLs 3개
 >
-> 적용 내용: `account.tenone.biz/` = 계정 관리 · 어느 도메인이든 `/profile` → account 308 · account의 다른 경로 → www 308 · `admin.tenone.biz` → `account.tenone.biz` 308 (인트라 입구를 드러내지 않게) · `mypage.tenone.biz` → `www.tenone.biz/my` 308 · `/profile` 링크는 `CrossSiteLink`(account 절대 주소) · 이월: 2-6(LoginRequired), 2-8(site-check 항목)
+> 적용 내용: `account.tenone.biz/` = 계정 관리 · 어느 도메인이든 `/profile` → account 308 · account의 다른 경로 → www 308 · `mypage.tenone.biz` → `www.tenone.biz/my` 308 · `/profile` 링크는 `CrossSiteLink`(account 절대 주소) · 이월: 2-6(LoginRequired), 2-8(site-check 항목)
 > 결정: 사용자 승인 (2026-10-16) — 계정 관리는 `account.tenone.biz` 하나로, 사이트별 마이 페이지는 각 사이트 `/my`에 그대로
 
 ## 1. 이름과 자리 (Google 대응)
@@ -14,7 +14,7 @@
 | accounts.google.com (로그인) | 로그인 허브 | 누구나 | `auth.tenone.biz` (이미 있음) |
 | 서비스 안의 내 화면 (유튜브 내 채널 등) | **마이 페이지** | 회원 본인 | 각 사이트 `/my` — 서브도메인으로 나누지 않음 |
 
-- `admin.`을 회원 화면에 쓰지 않는다 — 직원 콘솔(인트라)과 이름이 섞이고 회원에게 "관리자 화면"으로 읽힌다
+- `admin` 주소·이름은 **어디에도 쓰지 않는다** (2026-10-16 사용자 지시) — 회원 화면에도, 인트라 입구로도
 - `mypage.{브랜드 도메인}`은 만들지 않는다 — 독립 도메인마다 DNS·Vercel·Turnstile·Supabase 4곳 작업 + 세션이 도메인별이라 로그인 연결이 또 필요하다
 - 공개 프로필(`tenone.biz/@핸들`, 브랜드 `/@핸들`)은 **옮기지 않는다** — 남이 보는 화면은 서비스 주소에, 본인 설정만 account로
 
