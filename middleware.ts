@@ -57,7 +57,7 @@ export async function middleware(request: NextRequest) {
         const apexOf = Object.values(CANONICAL_HOSTS).find(c => c.hosting === 'vercel' && c.host === `www.${reqHost}`);
 
         // 계정 관리·관리자 주소 (2026-10-16, docs/Account_Subdomain_Plan.md)
-        //   - admin.tenone.biz  → intra.tenone.biz (Google admin = 조직 관리 콘솔 = 인트라)
+        //   - admin.tenone.biz  → account.tenone.biz (계정 관리로. 인트라로 보내지 않는다 — 'admin.'은 공격자가 먼저 두드리는 주소라 직원 로그인 입구를 드러내지 않게)
         //   - mypage.tenone.biz → www.tenone.biz/my (마이 페이지는 각 사이트 /my)
         //   - 어느 도메인이든 /profile(본인 화면) → account.tenone.biz/ · account의 다른 화면 경로는 www로
         const isAccountHost = reqHost === 'account.tenone.biz';
@@ -65,7 +65,7 @@ export async function middleware(request: NextRequest) {
         const accountPass = /^\/(api|auth|_next|login|signup|reset-password|oauth|terms|privacy)(\/|$)/.test(pathname) || pathname.includes('.');
 
         if (reqHost === 'admin.tenone.biz') {
-            target = `https://intra.tenone.biz${pathname}${request.nextUrl.search}`;
+            target = `${ACCOUNT_ORIGIN}/`;
         } else if (reqHost === 'mypage.tenone.biz') {
             target = 'https://www.tenone.biz/my';
         } else if (isAccountHost && !accountPass && pathname !== '/') {
