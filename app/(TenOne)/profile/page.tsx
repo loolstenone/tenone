@@ -9,7 +9,7 @@ import { ProfileComments } from "@/components/ProfileComments";
 import { UCBalanceCard } from "@/components/UCBalanceCard";
 import { UC_PUBLIC } from "@/lib/uc-visibility";
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { CrossSiteLink } from "@/components/CrossSiteLink";
 
 /**
  * 계정 관리 (Ten:One 계정 하나의 프로필·공개 설정·보안) — 계정 메뉴 이름과 같게 (2026-10-16). 사이트별 '마이 페이지'는 /{brand}/my·TenOne /my — 2026-10-16 개편
@@ -28,9 +28,10 @@ export default function ProfilePage() {
 
     return (
         <div className="max-w-6xl mx-auto py-10 px-4 sm:px-6">
-            <Link href="/" className="inline-flex items-center gap-1 text-sm tn-text-sub hover:tn-text transition-colors">
+            {/* account.tenone.biz에서 "/"는 이 화면 자신 — 홈은 www.tenone.biz로 (CrossSiteLink) */}
+            <CrossSiteLink href="/" className="inline-flex items-center gap-1 text-sm tn-text-sub hover:tn-text transition-colors">
                 <ArrowLeft className="h-4 w-4" /> 홈으로
-            </Link>
+            </CrossSiteLink>
             <header className="mt-6 mb-8">
                 <h1 className="text-2xl font-bold tn-text">계정 관리</h1>
                 <p className="mt-2 text-sm tn-text-sub leading-relaxed">
