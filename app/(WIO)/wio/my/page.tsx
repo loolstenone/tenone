@@ -5,7 +5,6 @@ import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { CapabilitySection } from "@/components/CapabilitySection";
-import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { useRouter } from "next/navigation";
 import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye } from "lucide-react";
 
@@ -44,11 +43,6 @@ export default function WIOMyPage() {
     return (
         <div className="min-h-screen pt-24 pb-20 px-6 bg-neutral-950 text-neutral-100">
             <div className="max-w-4xl mx-auto">
-                {user?.id && (
-                    <div className="mb-6">
-                        <HitProfileBadge memberId={user.id} respectOptIn />
-                    </div>
-                )}
                 <MyProfileCard accentColor="#818CF8" siteBadge="WIO" />
 
                 {user?.id && <CapabilitySection memberId={user.id} brandId="wio" accentColor="#818CF8" className="mb-6" />}

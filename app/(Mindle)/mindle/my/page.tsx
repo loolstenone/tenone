@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { MyProfileCard } from "@/components/MyProfileCard";
-import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import Link from "next/link";
 import { Bookmark, Bell, Settings, Eye, Plus, X, TrendingUp } from "lucide-react";
@@ -49,11 +48,6 @@ export default function MindleMyPage() {
     return (
         <div className="bg-[#0A0A0A]">
             <div className="mx-auto max-w-4xl px-6 py-10">
-                {user?.id && (
-                    <div className="mb-4">
-                        <HitProfileBadge memberId={user.id} respectOptIn />
-                    </div>
-                )}
                 <MyProfileCard accentColor="#6366F1" />
 
                 {user?.id && <CapabilitySection memberId={user.id} brandId="mindle" accentColor="#6366F1" className="mb-6" />}

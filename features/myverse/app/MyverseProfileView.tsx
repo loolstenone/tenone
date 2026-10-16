@@ -7,7 +7,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { AuthGate } from "@/components/AuthGate";
 import { MyProfileCard } from "@/components/MyProfileCard";
-import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
 import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye } from "lucide-react";
@@ -44,11 +43,6 @@ export function MyverseProfileView({ dark = true, fullPage = true }: { dark?: bo
     const inner = (
         <div className={`${fullPage ? "min-h-screen pt-24" : "pt-6"} pb-20 px-5 md:px-10 ${bg}`}>
             <div className="max-w-4xl mx-auto">
-                {user?.id && (
-                    <div className="mb-4">
-                        <HitProfileBadge memberId={user.id} respectOptIn />
-                    </div>
-                )}
                 <MyProfileCard
                     accentColor="#6366F1"
                     siteBadge="마이버스"

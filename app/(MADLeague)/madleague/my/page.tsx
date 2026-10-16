@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 import { MyProfileCard } from "@/components/MyProfileCard";
-import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { useRouter } from "next/navigation";
 import {
     ArrowRight, ClipboardList,
@@ -122,11 +121,6 @@ export default function MadLeagueMyPage() {
             <div className="min-w-0">
             <div className="pb-4">
                 {/* 공통 프로필 카드 + MADLeague 특화 정보 */}
-                {user?.id && (
-                    <div className="mb-4">
-                        <HitProfileBadge memberId={user.id} respectOptIn />
-                    </div>
-                )}
                 <MyProfileCard accentColor="#EC1D25" siteBadge={roleLabel}>
                     {/* 칸이 하나도 없으면 빈 상자만 남는다 — 값이 있을 때만 */}
                     {madStatus === 'active' && madInfo && (madInfo.club_name || madInfo.cohort || madInfo.university || (madInfo.activity_years?.length ?? 0) > 0) && (

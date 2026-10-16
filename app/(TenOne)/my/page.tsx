@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
 import { useRouter } from "next/navigation";
-import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import Link from "next/link";
@@ -75,11 +74,6 @@ export default function MyPage() {
                 <MyProfileCard accentColor="#171717" />
 
                 {user?.id && <CapabilitySection memberId={user.id} brandId="tenone" accentColor="#171717" className="mb-6" />}
-
-                {/* HIT 프로필 */}
-                <div className="mb-6">
-                    <HitProfileBadge memberId={user?.id} respectOptIn />
-                </div>
 
                 {/* 탭 */}
                 <div className="flex items-center gap-1 mb-8 border-b" style={{ borderColor: "var(--tn-border)" }}>

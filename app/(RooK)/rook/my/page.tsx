@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
-import HitProfileBadge from "@/features/hit/HitProfileBadge";
 import { MyProfileCard } from "@/components/MyProfileCard";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
@@ -36,11 +35,6 @@ export default function RooKMyPage() {
     return (
         <div className="min-h-screen pt-24 pb-20 px-6 bg-neutral-900 text-neutral-100">
             <div className="max-w-4xl mx-auto">
-                {/* HIT 프로필 */}
-                <div className="mb-6">
-                    <HitProfileBadge memberId={user?.id} respectOptIn />
-                </div>
-
                 <MyProfileCard accentColor="#00d255" />
                 {user?.id && <CapabilitySection memberId={user.id} brandId="rook" accentColor="#00d255" className="mb-6" />}
 

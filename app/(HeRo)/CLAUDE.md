@@ -130,7 +130,7 @@
 1. 사용자가 HIT 검사를 받으면 64종 중 하나의 `type_code` 획득 (예: `C-INFJ`, `P-ENFP`)
 2. `hit_hero_types` 테이블 = SSOT (64개 타입 정의, `character_name` · `character_label` · `strengths` · `cautions`)
 3. 사용자는 **opt-in**으로 자기 유형을 Universe 프로필에 badge로 노출 선택 가능
-4. 어느 브랜드 사이트에서든 `<HitProfileBadge memberId={...} />` 컴포넌트로 즉시 표시
+4. `<HitProfileBadge>` 카드는 **HeRo 마이페이지(`/hero/my`)에만** 둔다 — 다른 브랜드 마이페이지 22곳에서 삭제 (2026-10-16 사용자 지시). ❌ 다른 브랜드 마이페이지에 다시 넣기
 
 ### 적용 범위
 
@@ -598,7 +598,7 @@ HeRo가 탑재한 Universe capability (SSOT: `brand_capabilities`):
 | **사용자 측 완성 (세션 81)** | `/hero/journey` auth 분기 (비로그인 마케팅 + 로그인 워크스페이스) · 탭 6개 · Today 위젯 5개 · 스트릭 배지 + UC 토스트 · 목표 CRUD + 주간 체크인 · 채용 피드 |
 | **64 유형 SSOT 개편 (세션 81)** | character_name 64개 "The + 직업원형"으로 리네이밍 · character_label 구조 변경 · profile_overview 4문단 표준 · strengths/cautions/fit_direction JSONB 표준화 · 디자인 시스템 2문서 (`docs/hero-types-design-system.md` + `docs/hero-types-pilot-prompts.md`) |
 | **헤더 변경 (세션 81)** | ABOUT · Journey · Profile · 공유 · 검색 순서 (UniverseUtilityBar workspace 위치 이동, 전 브랜드 공통 영향) |
-| **이월** | 64캐릭터 일러스트 양산 · HIT 질문 DB 단일화 (24파일→hit_questions) · HitProfileBadge 21개 브랜드 삽입 · TIH SSOT(산업군/직무군) 교체 |
+| **이월** | 64캐릭터 일러스트 양산 · HIT 질문 DB 단일화 (24파일→hit_questions) · TIH SSOT(산업군/직무군) 교체 |
 | **보류 (사업 시작)** | 결제 PG · 유료 gate 활성화 · 환불 정책 |
 | **색 SSOT 확정 (세션 82)** | Action/Accent/State layer만 HeRo Red · `group-hover:text-[#E53935]` on `font-bold` titles = hover-only affordance = ACCEPTABLE · per-card outline red = ACCEPTABLE · semantic red = 항상 ACCEPTABLE |
 | **세션 163 (2026-10-08)** | 코어 프로그램 모듈 연결 — `/hero/programs`·`/hero/certificate`·`/intra/hero/programs` · Action Hub `program_applications`(hero) · MADLeague 프로그램 화면에 HeRo 회차 노출 |
