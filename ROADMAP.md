@@ -131,6 +131,16 @@
 - [ ] security_definer 뷰 9 · 유출 비번 차단 · 매일 밤 RLS/DEFINER 자동 점검 job · 인트라 쿠키 분리
 - [ ] ESLint 설정 복구 · tsc 기존 에러 정리 (CI 게이트화)
 
+## 🪪 프로필·검색 노출·MADLeague 이전 준비 (세션 178 — 2026-10-16)
+
+- [x] 프로필 P0(기본 비공개)·P1(핸들 규칙·공유 링크·신고·방문 수)·P2(MADLeague 공개 프로필) · 핸들 로그인 폐지
+- [x] 첫 방문 SSO 자동 확인 · 캡차 UX(자동 진행·실패 안내)
+- [x] MADLeague 홈 A안 · 공모전/프로젝트(외부 등록·승인) · 옛 madleague.net 주소 308
+- [x] 도메인별 robots·sitemap·llms.txt + 인트라 검색 노출 설정
+- [ ] madleague.net DNS 전환 (도메인 기관 이전 후) + Search Console 사이트맵 제출
+- [ ] HeRo·MADLeap·Badak 공개 프로필 (브랜드 추가 3곳)
+- [ ] 다른 브랜드 레이아웃에 `<SiteJsonLd>` 연결
+
 ## 🎓 경쟁 PT·인증서 현실화 (세션 177 — 2026-10-16)
 
 - [x] 인증서 표 칸 정리(소속·프로그램·팀·상태/버튼 분리) · 열별 정렬 · 발급 코드순

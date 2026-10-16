@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-10-16 (세션 178) — 프로필 체계 · 첫 방문 SSO · 캡차 UX · MADLeague 이전 준비 · 도메인별 검색 노출
+
+### 장소·운영
+
+- master 단일 · push: 사용자 "푸시" 4회(프로필·SSO / 캡차 / MADLeague 홈 / 공모전·옛 주소) + 작업 종료
+- **유니버스 DB 쓰기 (사용자 승인)**: 프로필 P0~P2b 마이그레이션(전원 비공개 전환 21명 — 전부 테스트 계정) · `bums_post_status`에 `pending` · ums_boards madleague/contest + 공모전 24건 이전 · `ums_sites` 검색 노출 4컬럼 · 테스트로 넣은 madleague json_ld·llms_txt는 확인 후 NULL 복원
+
+### 결정
+
+- 핸들은 유니버스 하나 · 로그인 ID로 쓰지 않음(핸들 로그인 폐지) · 공개는 본인이 켤 때만 · 검색 노출 별도 동의 · 만 14세 미만 공개 불가
+- 사이트 이동 시 로그인 유지 = A안(첫 방문 자동 확인, 6시간 1회)
+- MADLeague 홈 = A안, 슬라이딩 카피 유지, 헬멧 사진 반복 사용 금지·사진 설명 문구 없음
+- 공모전/프로젝트 = 외부인이 올리고 운영진 확인 후 게시 · 채용 공고 받지 않음
+- madleague.net 이전: 이메일은 tenone.biz만 사용(MX 불필요) · 도메인 기관 이전 며칠 소요
+
+### 파일
+
+- 프로필: `lib/profile/*` · `components/profile/*` · `features/profile/BrandPublicProfile.tsx` · `features/madleague/MadProfileSection.tsx` · `app/(TenOne)/profile/[handle]/*` · `app/(MADLeague)/madleague/u/[handle]/*` · `app/api/profile/view` · `app/api/intra/profile-reports` · `app/intra/ums/members/profile-reports` · `middleware.ts`(/@핸들) · 삭제 `app/api/auth/handle-login`
+- SSO·캡차: `lib/sso-auto.ts` · `components/CaptchaWidget.tsx` · `components/OneIdHelp.tsx` · 폼 약 20곳 `waitThenSubmit`
+- MADLeague: `features/madleague/MadHomeHero.tsx` · `madzine/page.tsx` · `madzine/contest/*` · `lib/supabase/madleague-contest.ts` · `lib/madleague-legacy-redirects.ts` · `scripts/madleague-pinboard-import.mjs` · 공통 게시판 `types/board.ts`·`lib/supabase/board.ts`·`BoardContentList`
+- 검색 노출: `lib/site-seo.ts` · `app/sitemap.ts` · `app/robots.txt/route.ts` · `app/llms.txt/route.ts` · `app/api/intra/sites/seo/route.ts` · `components/intra/SiteSeoPanel.tsx` · `components/SiteJsonLd.tsx` · `sql/site-seo-settings.sql` · 삭제 `public/robots.txt`
+
+### 발견·교훈
+
+- 모든 도메인이 tenone.biz robots·sitemap을 내보내고 있었다 (rook.co.kr에서도 tenone 주소 목록)
+- 인트라 '인공지능 최적화' 입력칸은 불러오기·저장이 없는 가짜였다
+- 앱 미리보기 창(자동화 브라우저)은 Cloudflare Turnstile이 600010으로 거절 → 로그인 확인은 사용자 크롬에서. 실패 시 위젯이 아무 안내 없이 무한 재시도하던 것 수정
+- 핸들이 로그인 ID를 겸해 공개 주소가 곧 계정 공격 표적이었다 → 폐지
+
+---
+
 ## 2026-10-15 ~ 10-16 (세션 177) — 인증서 화면 · MADLeague 대시보드 현실화 · 사이드바 동시 선택 · 파비콘
 
 ### 장소·운영

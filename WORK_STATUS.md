@@ -1,6 +1,34 @@
 # 작업 현황
 
-> 마지막 업데이트: 2026-10-16 (세션 177 — 인증서 화면·MADLeague 대시보드 현실화·사이드바·파비콘)
+> 마지막 업데이트: 2026-10-16 (세션 178 — 프로필 체계·SSO 자동 확인·캡차 UX·MADLeague 이전 준비·도메인별 검색 노출)
+
+---
+
+## 세션 178 (2026-10-16) — 프로필 체계 · 첫 방문 SSO · 캡차 UX · MADLeague 홈·공모전·옛 주소 · 도메인별 검색 노출
+
+> master 단일 · 중간 push = 사용자 "푸시" 4회 + 작업 종료 push.
+> **다음 시작**: `git checkout master && git pull origin master` → 아래 "다음 첫 액션" 1번부터.
+
+### 완료
+
+- **프로필 체계 P0·P1·P2** (유니버스 DB 적용 — `sql/profile-p0-privacy.sql`·`profile-p1-core.sql`·`profile-p2-brand.sql`·`profile-p2b-report-scope.sql`): 핸들 = 유니버스 하나·**핸들 로그인 폐지** · 신규·기존 전원 기본 비공개 · 공개 항목 DB 함수 한 곳(`profile_public_payload`·`brand_profile_payload`) · 핸들 규칙(예약어·7일 1회·옛 핸들 90일 잠금·30일 이동) · 기한 있는 공유 링크·QR·방문 수·검색 노출 별도 동의·신고 → 인트라 숨김 · 만 14세 미만 공개 불가 · 볼 수 없는 프로필 = 가입 안내 화면(`ProfileInvite`) · **MADLeague 공개 프로필** `madleague.net/@핸들` + 마이페이지 설정 패널 · 옛 공개 포트폴리오 → 공개 프로필 통합 · 처리방침 2026-10-16
+- **첫 방문 SSO 자동 확인** (`lib/sso-auto.ts`, middleware) — 즐겨찾기·주소 직접 입력으로 다른 사이트에 와도 로그인 유지 (6시간 1회)
+- **캡차 UX** (`components/CaptchaWidget.tsx`): 평소 자리 차지 안 함 · 필요할 때만 카드 · 확인 중 제출하면 도는 표시 후 자동 진행 · **실패 시 안내 + 다시 시도**(Cloudflare 반복 재시도 중단) · One ID 안내("@핸들은 로그인에 쓰지 않음")
+- **MADLeague**: 홈 첫 화면 A안(AI 티 제거·슬라이딩 카피 유지·헬멧 발표 사진 한 곳) · MADzine 지난 이야기 썸네일 · **공모전/프로젝트**(옛 pinboard 24건 이전 · 로그인 회원 외부 등록 → 운영진 승인 후 게시, 공통 게시판 `pending`·`options.review`) · **옛 madleague.net 주소 308** (`lib/madleague-legacy-redirects.ts`, 옛 sitemap 47개 + `?idx` 글)
+- **도메인별 robots·sitemap·llms.txt** (`lib/site-seo.ts`) + 인트라 › 사이트 설정 › 검색 노출·인공지능 최적화(저장 안 되던 가짜 입력칸 → `SiteSeoPanel`·`/api/intra/sites/seo`) · `ums_sites` 4컬럼(`sql/site-seo-settings.sql`) · `<SiteJsonLd>`(MADLeague) · `public/robots.txt` 삭제
+
+### 다음 첫 액션
+
+1. **배포 후 확인 (사용자 브라우저 — 앱 미리보기 창은 Cloudflare가 로봇으로 판정해 로그인 불가, 600010)**: 크롬에서 인트라 로그인 → 사이트 설정 › MADLeague › 검색 노출 패널(차단 이유 "외부 서버 운영 중", 열리면 73개) · 저장 1회 · `https://www.rook.co.kr/robots.txt`·`/sitemap.xml`이 rook 주소로 나오는지 · 미리보기 창 캡차 체크 시 "실패" 안내가 뜨는지
+2. **MADLeague 마이페이지 공개 프로필 패널 실검증** (로그인) · 공모전 "소식 올리기" 1건 → 인트라 `/intra/ums/madleague/contest` 승인
+3. **madleague.net DNS 전환** (도메인 기관 이전 끝나면 — 며칠): Vercel 도메인은 연결·인증 완료. 가비아 DNS = A `216.150.1.1`·`216.150.16.1`, www CNAME `85127a570110d322.vercel-dns-017.com.` (적용 직전 `get_domain_config`로 재확인) → `CANONICAL_HOSTS.madleague` `hosting: 'vercel'` · `ums_sites.hosting` · next.config noindex 목록에서 madleague 제거 · Turnstile hostname · Supabase Redirect URLs · GA4 도메인 · `npm run site:check -- madleague --live` · Search Console에 `https://www.madleague.net/sitemap.xml` 제출 · 호스트코코아 종료 절차(§0.1, 회원 0)
+4. 세션 177 결정 대기 그대로 (MAD Crown 표기 · 경쟁 PT 현실화 DB 4건 · 테스트 데이터 삭제)
+
+### 주의
+
+- 회원 전부 테스트 계정 (개발 단계) — 처리방침 변경 공지·재동의 안 함
+- 다른 브랜드(HeRo·MADLeap·Badak) 공개 프로필은 미착수 — 추가 3곳: `BRAND_PROFILES` · DB `brand_profile_enabled`·`{brand}_profile_section()` · `app/({Brand})/{brand}/u/[handle]/`
+- 사이트맵 회원 전용 경로 제외 = `lib/site-seo.ts` `PRIVATE_PATHS` — 새 회원 전용 메뉴를 만들면 여기에
 
 ---
 
