@@ -57,9 +57,27 @@ export function useCaptcha() {
     const pendingRef = useRef<HTMLElement | null>(null);
     const [waiting, setWaiting] = useState(false);
     const [stalled, setStalled] = useState(false);
+    /** 보안 확인 실패 (Cloudflare 오류) — 기다리기를 멈추고 안내 + 다시 시도 */
+    const [failed, setFailed] = useState(false);
+    const failedRef = useRef(false);
+    useEffect(() => { failedRef.current = failed; }, [failed]);
+
+    const onError = useCallback(() => {
+        setToken(undefined);
+        setFailed(true);
+        setWaiting(false);
+        setStalled(false);
+        pendingRef.current = null;
+    }, []);
+
+    const onToken = useCallback((t: string | undefined) => {
+        setToken(t);
+        if (t) setFailed(false);
+    }, []);
 
     const reset = useCallback(() => {
         setToken(undefined);
+        setFailed(false);
         setResetKey(k => k + 1);
     }, []);
 
@@ -67,6 +85,8 @@ export function useCaptcha() {
     const waitThenSubmit = useCallback((e?: { currentTarget?: EventTarget | null; target?: EventTarget | null }) => {
         const el = (e?.currentTarget ?? e?.target) as HTMLElement | null | undefined;
         pendingRef.current = el ? (el.closest?.("form") ?? el) : null;
+        // 실패한 뒤 다시 누르면 확인을 새로 시작한다 (실패 상태로는 토큰이 오지 않아 영원히 기다리게 된다)
+        if (failedRef.current) { setFailed(false); setResetKey(k => k + 1); }
         setWaiting(true);
         setStalled(false);
     }, []);
@@ -92,9 +112,11 @@ export function useCaptcha() {
         ready: !CAPTCHA_ENABLED || !!token,
         /** 확인 중에 제출을 눌러 기다리는 중 */
         waiting,
+        /** 보안 확인 실패 — 제출 버튼은 "보안 확인 중"에 묶어 두지 않는다 */
+        failed,
         reset,
         waitThenSubmit,
-        widgetProps: { onToken: setToken, resetKey, waiting, stalled },
+        widgetProps: { onToken, onError, onRetry: reset, failed, resetKey, waiting, stalled },
     };
 }
 
@@ -105,8 +127,11 @@ export function useCaptcha() {
  * - 캡차는 칸 폭에 맞춰 늘린다 (size flexible) · theme은 화면 바탕에 맞춘다 (인트라 dark, 흰 로그인 창 light)
  * - 확인 중에 제출하면 도는 표시 + "끝나면 자동으로 진행" (useCaptcha.waitThenSubmit)
  */
-export function CaptchaWidget({ onToken, resetKey, waiting = false, stalled = false, theme = "auto", hideStatus = false }: {
+export function CaptchaWidget({ onToken, onError, onRetry, failed = false, resetKey, waiting = false, stalled = false, theme = "auto", hideStatus = false }: {
     onToken: (t: string | undefined) => void;
+    onError?: () => void;
+    onRetry?: () => void;
+    failed?: boolean;
     resetKey: number;
     waiting?: boolean;
     stalled?: boolean;
@@ -132,7 +157,9 @@ export function CaptchaWidget({ onToken, resetKey, waiting = false, stalled = fa
                     language: "ko",
                     callback: (t: string) => { setInteractive(false); onToken(t); },
                     "expired-callback": () => onToken(undefined),
-                    "error-callback": () => onToken(undefined),
+                    // 실패하면 Cloudflare가 혼자 재시도를 반복한다 → 멈추고 사람에게 알린다
+                    "error-callback": () => { setInteractive(false); (onError ?? (() => onToken(undefined)))(); return true; },
+                    retry: "never",
                     "before-interactive-callback": () => setInteractive(true),
                     "after-interactive-callback": () => setInteractive(false),
                 });
@@ -144,7 +171,7 @@ export function CaptchaWidget({ onToken, resetKey, waiting = false, stalled = fa
             widgetId.current = null;
         };
         // resetKey 변경 시 위젯 재생성 → 새 토큰 발급
-    }, [onToken, resetKey, theme]);
+    }, [onToken, onError, resetKey, theme]);
 
     if (!SITE_KEY) return null;
     // 바깥 페이지 글자색을 물려받으면 흰 창 안에서 흐려진다 (검정 사이트 위 흰 로그인 창) → 테마로 직접 정한다
@@ -169,6 +196,17 @@ export function CaptchaWidget({ onToken, resetKey, waiting = false, stalled = fa
                 )}
                 <div ref={ref} className="w-full" />
             </div>
+            {failed && (
+                <div role="alert" className={`rounded-xl border px-4 py-3 text-xs ${tone}`} style={line}>
+                    <div className="flex items-center gap-2 font-semibold"><ShieldIcon /> 보안 확인에 실패했어요</div>
+                    <p className="mt-1.5 opacity-70 leading-relaxed">
+                        잠시 뒤 다시 시도해 주세요. 계속 실패하면 다른 브라우저(크롬·사파리 등)에서 열거나, 광고 차단·보안 확장 프로그램을 잠시 꺼 주세요.
+                    </p>
+                    {onRetry && (
+                        <button type="button" onClick={onRetry} className="mt-2.5 underline underline-offset-2 font-medium">다시 시도</button>
+                    )}
+                </div>
+            )}
             {waiting && !interactive && !hideStatus && (
                 <p role="status" aria-live="polite" className={`flex items-center justify-center gap-2 text-xs opacity-80 ${tone.split(" ")[0]}`}>
                     <span className="inline-block h-3.5 w-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" aria-hidden />
