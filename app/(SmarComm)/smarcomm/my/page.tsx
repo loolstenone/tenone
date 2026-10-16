@@ -21,7 +21,7 @@ export default function SmarCommMyPage() {
 
     useEffect(() => {
         if (!user?.id) return;
-        fetch(`/api/board/posts?site=smarcomm&limit=20&status=published`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
+        fetch(`/api/board/posts?site=smarcomm&limit=20&status=published&author_id=${encodeURIComponent(user.id)}`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
     }, [user?.id]);
 
     if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-neutral-900"><div className="h-6 w-6 border-2 border-neutral-600 border-t-[#8B5CF6] rounded-full animate-spin" /></div>;

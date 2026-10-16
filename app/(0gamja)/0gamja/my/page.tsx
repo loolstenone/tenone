@@ -21,7 +21,7 @@ export default function OgamjaMyPage() {
 
     useEffect(() => {
         if (!user?.id) return;
-        fetch(`/api/board/posts?site=0gamja&limit=20&status=published`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
+        fetch(`/api/board/posts?site=0gamja&limit=20&status=published&author_id=${encodeURIComponent(user.id)}`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
     }, [user?.id]);
 
     const tabs = [

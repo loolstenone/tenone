@@ -24,7 +24,7 @@ interface MyProfileCardProps {
     children?: React.ReactNode;
     /** 카드 테마 — 기본 dark (21개 브랜드 호환). light 컨텍스트(마이버스 앱 셸)에선 "light" */
     theme?: "light" | "dark";
-    /** Universe Profile 링크. null = 숨김. 기본은 tenone.biz/profile */
+    /** Ten:One 프로필·계정 링크. null = 숨김. 기본 /profile (모든 도메인 공용 경로) */
     universeProfileHref?: string | null;
 }
 
@@ -35,7 +35,7 @@ interface MyProfileCardProps {
  * - 아바타 (이미지 or 이니셜)
  * - 이름, 이메일, 연락처, 소속
  * - 사이트별 역할 뱃지
- * - Universe Profile 링크
+ * - Ten:One 프로필·계정 링크 (/profile)
  * - children: 사이트별 프로필 추가 정보 (동아리, 직무 등)
  */
 export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark", universeProfileHref }: MyProfileCardProps) {
@@ -48,8 +48,7 @@ export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark"
         : "rounded-2xl border border-neutral-700/50 bg-neutral-900/50 overflow-hidden mb-8";
     const nameCls = isLight ? "text-lg font-bold text-neutral-900 truncate" : "text-lg font-bold text-white truncate";
     const emailCls = isLight ? "text-sm text-neutral-500 truncate" : "text-sm text-neutral-400 truncate";
-    const handleCls = isLight ? "text-xs text-neutral-400 hover:text-neutral-700 transition-colors shrink-0" : "text-xs text-neutral-500 hover:text-neutral-300 transition-colors shrink-0";
-    const handleEmptyCls = isLight ? "text-xs text-neutral-500 hover:text-amber-600 transition-colors shrink-0 border border-neutral-300 rounded px-1.5 py-0.5" : "text-xs text-neutral-600 hover:text-amber-400 transition-colors shrink-0 border border-neutral-700 rounded px-1.5 py-0.5";
+    const handleCls = isLight ? "text-xs text-neutral-400 shrink-0" : "text-xs text-neutral-500 shrink-0";
     const staffBadgeCls = isLight ? "text-xs font-semibold px-2 py-0.5 rounded-full bg-neutral-900/8 text-neutral-700" : "text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white";
     const companyCls = isLight ? "text-xs text-neutral-500 flex items-center gap-1" : "text-xs text-neutral-500 flex items-center gap-1";
     const infoBoxCls = isLight ? "grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-neutral-50 mb-4" : "grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-neutral-800/50 mb-4";
@@ -87,16 +86,11 @@ export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark"
 
     const initials = user.name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || '?';
 
-    // Universe Profile 링크 결정 — null이면 숨김, undefined(기본)이면 tenone.biz
-    const upHref = universeProfileHref === null
-        ? null
-        : universeProfileHref ?? (user.handle ? `https://tenone.biz/profile/@${user.handle}` : "https://tenone.biz/profile");
+    // Ten:One 프로필·계정 링크 — null이면 숨김. /profile은 모든 도메인에서 열린다 (공용 경로)
+    const upHref = universeProfileHref === null ? null : universeProfileHref ?? "/profile";
 
     return (
         <div className={cardCls}>
-            {/* 컬러 스트라이프 */}
-            <div className="h-1" style={{ backgroundColor: accentColor }} />
-
             <div className="p-6">
                 {/* 프로필 헤더 */}
                 <div className="flex items-center gap-5 mb-5">
@@ -114,15 +108,7 @@ export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark"
                         <h2 className={nameCls}>{user.name}</h2>
                         <div className="flex items-center gap-2">
                             <p className={emailCls}>{user.email}</p>
-                            {user.handle ? (
-                                <a href={`/profile/@${user.handle}`} className={handleCls}>
-                                    @{user.handle}
-                                </a>
-                            ) : (
-                                <Link href="/profile" className={handleEmptyCls}>
-                                    핸들 수정
-                                </Link>
-                            )}
+                            {user.handle && <span className={handleCls}>@{user.handle}</span>}
                         </div>
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                             {isStaff && (
@@ -157,15 +143,13 @@ export function MyProfileCard({ accentColor, siteBadge, children, theme = "dark"
                     </div>
                 )}
 
-                {/* Universe Profile 링크 (null이면 숨김) */}
+                {/* Ten:One 프로필·계정 링크 (null이면 숨김) — 이름·사진·소개 수정과 공개 설정은 계정 하나에서 */}
                 {upHref && (
                     <Link href={upHref} className={universeLinkCls}>
                         <Globe className={universeIconCls} />
                         <div className="flex-1">
-                            <p className={universePrimaryCls}>Universe Profile</p>
-                            <p className={universeSecondaryCls}>
-                                {user.handle ? `tenone.biz/profile/@${user.handle} · 수정` : '프로필 수정 · 전체 서비스 관리'}
-                            </p>
+                            <p className={universePrimaryCls}>Ten:One 프로필 · 계정</p>
+                            <p className={universeSecondaryCls}>이름·사진·소개 수정 · 공개 설정 — 모든 서비스 공통</p>
                         </div>
                         <ChevronRight className={universeChevronCls} />
                     </Link>

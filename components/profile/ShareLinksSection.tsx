@@ -93,17 +93,20 @@ export function ShareLinksSection({ scope, buildUrl, tone, onChanged }: {
     return (
         <div className="space-y-3">
             <h3 className={`text-xs font-semibold flex items-center gap-1.5 ${tone.text}`}><Link2 className="h-3.5 w-3.5" /> 기한 있는 공유 링크</h3>
-            <p className={`text-[11px] ${tone.sub}`}>지원·제안할 때처럼 특정 사람에게만 보여 줄 때 씁니다. 비공개여도 열리고, 기한이 지나거나 회수하면 열리지 않습니다.</p>
+            <p className={`text-[11px] leading-relaxed ${tone.sub}`}>지원·제안처럼 특정 사람에게만 보여 줄 때. 비공개여도 열리고, 기한이 지나거나 회수하면 닫힙니다.</p>
             {notice && <p role="alert" className="text-xs text-red-500">{notice}</p>}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="space-y-2">
                 <input value={label} onChange={e => setLabel(e.target.value.slice(0, 40))} placeholder="메모 (예: ○○사 지원)"
-                    className={`text-xs rounded-lg px-3 py-1.5 w-48 ${tone.field}`} />
-                <select value={days} onChange={e => setDays(Number(e.target.value))} className={`text-xs rounded-lg px-2 py-1.5 ${tone.field}`}>
-                    {DAY_OPTIONS.map(d => <option key={d} value={d}>{d}일</option>)}
-                </select>
-                <button onClick={create} disabled={busy} className={`text-[11px] font-medium px-3 py-1.5 rounded-lg disabled:opacity-40 ${tone.button.className}`} style={tone.button.style}>
-                    링크 만들기
-                </button>
+                    className={`w-full text-xs rounded-lg px-3 py-2 ${tone.field}`} />
+                <div className="flex gap-2">
+                    {/* 옵션 목록은 브라우저가 흰 바탕으로 그린다 — 글자색을 직접 정해야 어두운 화면에서도 보인다 */}
+                    <select value={days} onChange={e => setDays(Number(e.target.value))} className={`text-xs rounded-lg px-2 py-2 ${tone.field}`}>
+                        {DAY_OPTIONS.map(d => <option key={d} value={d} className="bg-white text-neutral-900">{d}일 동안</option>)}
+                    </select>
+                    <button onClick={create} disabled={busy} className={`flex-1 text-xs font-medium px-3 py-2 rounded-lg disabled:opacity-40 ${tone.button.className}`} style={tone.button.style}>
+                        링크 만들기
+                    </button>
+                </div>
             </div>
             {newLink && (
                 <div className="rounded-xl border border-amber-400/60 p-3 space-y-2">

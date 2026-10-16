@@ -5,13 +5,12 @@ import { UC_PUBLIC } from "@/lib/uc-visibility";
 import { useAuth } from '@/lib/auth-context';
 import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from '@/components/CaptchaWidget';
 import { siteConfigs, type SiteIdentifier } from '@/lib/site-config';
-import { getAllServiceProfiles, type ServiceProfileData, getBadakActivity, type BadakActivityData, checkHandleAvailable } from '@/lib/supabase/universe-profile';
+import { getAllServiceProfiles, type ServiceProfileData, getBadakActivity, type BadakActivityData } from '@/lib/supabase/universe-profile';
 import { getCapabilityAggregation, type CapabilityAggregation } from '@/lib/supabase/capabilities';
 import { getAllSiteConfigs, type SiteConfigRow } from '@/lib/supabase/site-configs';
 import { createClient } from '@/lib/supabase/client';
 import { ServiceLinksPanel } from '@/components/ServiceLinksPanel';
-import { ProfilePublishPanel } from '@/components/profile/ProfilePublishPanel';
-import { toPublicProfileData, friendlyDbError, type PublicProfileRow } from '@/lib/profile/public-profile';
+import { friendlyDbError } from '@/lib/profile/public-profile';
 import { JOB_FUNCTIONS, INDUSTRIES } from '@/lib/badak-constants';
 import type { TaxonomyKind } from '@/lib/supabase/taxonomies';
 import Image from 'next/image';
@@ -20,7 +19,7 @@ import {
     Building2, GraduationCap, Megaphone, Users, Briefcase,
     Sparkles, Palette, BookOpen, Rocket, Zap, Clock, Lock, Eye, EyeOff,
     Share2, Link as LinkIcon, ChevronDown, ChevronUp, CheckCircle2,
-    AlertCircle, Plus, Minus,
+    Plus, Minus,
 } from 'lucide-react';
 
 /* ── 전화번호 포맷 ── */
@@ -236,10 +235,9 @@ function ServiceCard({ siteId, siteName, color, serviceData, isClosed }: {
 }
 
 /* ── 관심 태그 칩 ── */
-function InterestChip({ label, color = '#6b7280' }: { label: string; color?: string }) {
+function InterestChip({ label }: { label: string; color?: string }) {
     return (
-        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-            style={{ backgroundColor: color + '18', color }}>
+        <span className="text-[11px] px-2.5 py-0.5 rounded-full border tn-border tn-text">
             {label}
         </span>
     );
@@ -303,9 +301,11 @@ interface UniverseProfileProps {
     publicData?: PublicProfileData;
     /** 프로필 카드와 유니버스 서비스 아코디언 사이에 렌더링 (방명록 등) */
     children?: React.ReactNode;
+    /** 본인 미리보기 — 공유 버튼 등 방문자용 도구를 그리지 않는다 */
+    preview?: boolean;
 }
 
-export function UniverseProfile({ isOwner = true, publicData, children }: UniverseProfileProps) {
+export function UniverseProfile({ isOwner = true, publicData, children, preview = false }: UniverseProfileProps) {
     const { user, isStaff, updateProfile } = useAuth();
 
     /* ── 표시용 프로필 (소유자=user, 공개=publicData) ── */
@@ -353,19 +353,12 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
         privacySettings: { ...DEFAULT_PRIVACY } as Record<string, boolean | undefined>,
         socialLinks: {} as Record<string, string | undefined>,
     });
-    const [handleChecking, setHandleChecking] = useState(false);
-    const [handleAvailable, setHandleAvailable] = useState<boolean | null>(null);
-    const [handleError, setHandleError] = useState('');
+    const [saveError, setSaveError] = useState('');
 
     /* ── 아바타 미리보기 상태 ── */
     const [pendingAvatar, setPendingAvatar] = useState<{ file: File; previewUrl: string } | null>(null);
     const [avatarUploading, setAvatarUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    /* ── 공개 범위 토글 ── */
-    const [visibilityUpdating, setVisibilityUpdating] = useState(false);
-    const [ownerNotice, setOwnerNotice] = useState('');   // DB가 거절한 이유 (만 14세 확인·핸들 규칙 등)
-    const [previewData, setPreviewData] = useState<PublicProfileData | null>(null);
 
     /* ── 공유 복사 ── */
     const [copied, setCopied] = useState(false);
@@ -374,9 +367,6 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
 
     /* ── 유니버스 서비스 패널 ── */
     const [sitesOpen, setSitesOpen] = useState(false);
-
-    /* ── 공개 프로필 미리보기 ── */
-    const [previewOpen, setPreviewOpen] = useState(false);
 
     /* ── 비밀번호 변경 ── */
     const [pwdOpen, setPwdOpen] = useState(false);
@@ -462,42 +452,6 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showShareMenu]);
 
-    /* ── 핸들 중복 체크 (debounce) ── */
-    useEffect(() => {
-        const handle = editForm.handle.trim();
-        if (!handle || handle === (user?.handle || '')) {
-            setHandleAvailable(null);
-            setHandleError('');
-            return;
-        }
-        if (!/^[a-z0-9_]{3,20}$/.test(handle)) {   // DB 제약 members_handle_format과 같게
-            setHandleError('3~20자, 영문 소문자·숫자·_ 만 사용할 수 있습니다');
-            setHandleAvailable(false);
-            return;
-        }
-        setHandleError('');
-        setHandleChecking(true);
-        const timer = setTimeout(() => {
-            checkHandleAvailable(handle, user?.id)
-                .then(ok => { setHandleAvailable(ok); setHandleChecking(false); })
-                .catch(() => { setHandleChecking(false); });
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [editForm.handle, user?.handle, user?.id]);
-
-    /* ── 다른 화면에서 '이 핸들 가져가기'로 왔을 때 (/profile?handle=…) — 편집을 열고 핸들을 채워 둔다 ── */
-    const claimChecked = useRef(false);
-    useEffect(() => {
-        if (!isOwner || !user || claimChecked.current) return;
-        claimChecked.current = true;
-        const want = new URLSearchParams(window.location.search).get('handle')?.toLowerCase() ?? '';
-        if (!/^[a-z0-9_]{3,20}$/.test(want) || want === user.handle) return;
-        startEditing();
-        setEditForm(f => ({ ...f, handle: want }));
-        window.history.replaceState(null, '', window.location.pathname);
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- 첫 진입 1회
-    }, [isOwner, user]);
-
     if (!profile) return null;
 
     const initials = profile.name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || '?';
@@ -540,30 +494,6 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
         setPendingAvatar(null);
     }
 
-    /* ── 공개 범위 토글 ── */
-    async function toggleVisibility() {
-        if (!user || !profile) return;
-        const next = profile.profileVisibility === 'public' ? 'private' : 'public';
-        setVisibilityUpdating(true);
-        setOwnerNotice('');
-        try {
-            const supabase = createClient();
-            const { error } = await supabase.from('members').update({ profile_visibility: next }).eq('id', user.id);
-            if (error) { setOwnerNotice(friendlyDbError(error, '공개 설정을 바꾸지 못했습니다.')); return; }
-            updateProfile({ profileVisibility: next });
-        } catch { setOwnerNotice('공개 설정을 바꾸지 못했습니다.'); }
-        finally { setVisibilityUpdating(false); }
-    }
-
-    /* ── 미리보기: 서버가 실제로 내보내는 값 그대로 (저장된 상태 기준) ── */
-    async function openPreview() {
-        setOwnerNotice('');
-        const { data, error } = await createClient().rpc('preview_my_public_profile');
-        if (error || !data) { setOwnerNotice('미리보기를 불러오지 못했습니다.'); return; }
-        setPreviewData(toPublicProfileData(data as PublicProfileRow));
-        setPreviewOpen(true);
-    }
-
     /* ── 공유 URL 복사 ── */
     const profileUrl = profile?.handle
         ? `${typeof window !== 'undefined' ? window.location.origin : 'https://tenone.biz'}/@${profile.handle}`
@@ -602,14 +532,12 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
             privacySettings: { ...DEFAULT_PRIVACY, ...(user?.privacySettings || {}) } as Record<string, boolean>,
             socialLinks: { ...(user?.socialLinks || {}) } as Record<string, string>,
         });
-        setHandleAvailable(null);
-        setHandleError('');
+        setSaveError('');
         setEditing(true);
     }
 
     /* ── 편집 저장 ── */
     async function saveEditing() {
-        if (handleError || handleChecking) return;
         const supabase = createClient();
         const updates: Record<string, unknown> = {
             name: editForm.name,
@@ -618,14 +546,12 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
             bio: editForm.bio,
             interests_industry: editForm.interestsIndustry,
             interests_job: editForm.interestsJob,
-            privacy_settings: editForm.privacySettings,
             social_links: editForm.socialLinks,
         };
-        if (editForm.handle.trim()) updates.handle = editForm.handle.trim();
+        // 핸들·공개 범위는 오른쪽 '공개 설정'에서 (ProfileVisibilityRail)
         const { error } = await supabase.from('members').update(updates).eq('id', user!.id);
         if (error) {
-            // 핸들 규칙(예약어·7일·90일 잠금)이나 중복이면 전체 저장이 거절된다 — 이유를 보여 주고 편집 상태 유지
-            setHandleError(friendlyDbError(error, '저장하지 못했습니다. 잠시 후 다시 시도해 주세요.'));
+            setSaveError(friendlyDbError(error, '저장하지 못했습니다. 잠시 후 다시 시도해 주세요.'));
             return;
         }
         updateProfile({
@@ -633,10 +559,8 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
             phone: editForm.phone,
             company: editForm.company,
             bio: editForm.bio,
-            handle: editForm.handle.trim() || undefined,
             interestsIndustry: editForm.interestsIndustry,
             interestsJob: editForm.interestsJob,
-            privacySettings: editForm.privacySettings as import('@/types/auth').PrivacySettings,
             socialLinks: editForm.socialLinks as import('@/types/auth').SocialLinks,
         });
         setEditing(false);
@@ -696,200 +620,103 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
     /* ── Badak 프로필 (job, industry) ── */
     const badakProfile = serviceProfiles.find(sp => sp.siteId === 'badak');
 
-    /* ── 배너 칩 표시용 ── */
-    const bannerChips: { label: string; color: string }[] = [];
-    if (heroType) bannerChips.push({ label: `⚔ ${heroType}`, color: '#dc2626' });
-    if (badakProfile?.fields?.['직무']) bannerChips.push({ label: String(badakProfile.fields['직무']), color: '#f59e0b' });
-    (profile.interestsJob || []).slice(0, 2).forEach(j => bannerChips.push({ label: j, color: '#3b82f6' }));
-    (profile.interestsIndustry || []).slice(0, 2).forEach(i => bannerChips.push({ label: i, color: '#8b5cf6' }));
-
     const isPublic = profile.profileVisibility !== 'private';
 
 
     return (
         <>
-        {/* ── 미리보기 모달 ── */}
-        {previewOpen && previewData && (
-            <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm overflow-y-auto py-8 px-4"
-                onClick={e => { if (e.target === e.currentTarget) setPreviewOpen(false); }}>
-                <div className="w-full max-w-2xl">
-                    <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-medium text-white/60 flex items-center gap-1.5">
-                            <Eye className="h-3.5 w-3.5" /> 외부인에게 보이는 화면
-                        </span>
-                        <button onClick={() => setPreviewOpen(false)}
-                            className="text-white/60 hover:text-white transition-colors cursor-pointer">
-                            <X className="h-5 w-5" />
-                        </button>
-                    </div>
-                    <UniverseProfile isOwner={false} publicData={previewData} />
-                </div>
-            </div>
-        )}
         <div className="space-y-5">
-            {isOwner && ownerNotice && (
-                <p role="alert" className="text-xs text-red-600 border border-red-300 rounded-xl px-4 py-3">{ownerNotice}</p>
-            )}
-
             {/* ════════════════════════════════
                 프로필 카드 (전체 통합)
             ════════════════════════════════ */}
             <div className="rounded-2xl border tn-border tn-surface overflow-hidden">
 
-                {/* ── 배너 ── */}
-                <div className="h-24 bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 relative">
-                    <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                        <Globe className="h-20 w-20 text-white" />
+                {/* ── 머리: 사진 · 이름 · 주소 (배너·그라데이션 없음) ── */}
+                <div className="px-8 pt-8 flex items-start gap-5">
+                    <div className="relative group/avatar shrink-0">
+                        {(pendingAvatar?.previewUrl || profile.avatarUrl) ? (
+                            <Image
+                                src={pendingAvatar?.previewUrl || profile.avatarUrl!}
+                                alt={profile.name || ''}
+                                width={80} height={80}
+                                unoptimized={!!pendingAvatar}
+                                className="h-20 w-20 rounded-full object-cover" />
+                        ) : (
+                            <div className="h-20 w-20 rounded-full tn-bg-alt border tn-border flex items-center justify-center text-xl font-bold tn-text">
+                                {initials}
+                            </div>
+                        )}
+                        {isOwner && !pendingAvatar && (
+                            <button onClick={() => fileInputRef.current?.click()} aria-label="사진 바꾸기"
+                                className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity cursor-pointer">
+                                <Camera className="h-5 w-5 text-white" />
+                            </button>
+                        )}
+                        {pendingAvatar && (
+                            <>
+                                <button onClick={handleAvatarCancel} title="취소"
+                                    className="absolute -bottom-1 -left-1 h-6 w-6 rounded-full bg-neutral-800 border-2 border-white flex items-center justify-center cursor-pointer shadow-md z-10">
+                                    <X className="h-3 w-3 text-white" />
+                                </button>
+                                <button onClick={handleAvatarConfirm} disabled={avatarUploading} title="저장"
+                                    className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-neutral-900 border-2 border-white flex items-center justify-center cursor-pointer shadow-md z-10 disabled:opacity-60">
+                                    {avatarUploading
+                                        ? <div className="h-2.5 w-2.5 border border-white/40 border-t-white rounded-full animate-spin" />
+                                        : <Check className="h-3 w-3 text-white" />}
+                                </button>
+                            </>
+                        )}
+                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
                     </div>
 
-                    {/* 배너 우측: 공유 버튼 */}
-                    <div className="absolute top-3 right-3 flex items-center gap-2">
-                        {(isPublic || isOwner) && (
-                            <div ref={shareMenuRef} className="relative">
-                                <button
-                                    onClick={handleNativeShare}
-                                    title="프로필 공유"
-                                    className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all cursor-pointer"
-                                    style={{ background: 'rgba(255,255,255,0.1)', color: '#d1d5db', border: '1px solid rgba(255,255,255,0.15)' }}>
-                                    <Share2 className="h-3 w-3" />
-                                    공유
-                                </button>
+                    <div className="flex-1 min-w-0 pt-2">
+                        <h1 className="text-xl font-bold tn-text truncate">{profile.name}</h1>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            {profile.handle && <p className="text-xs tn-text-sub">@{profile.handle}</p>}
+                            {isOwner && isStaff && <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border tn-border tn-text-sub">Staff</span>}
+                        </div>
+                    </div>
 
+                    <div className="flex items-center gap-2 pt-2 shrink-0">
+                        {/* 방문자: 공개 프로필 공유 (본인·미리보기·공유 링크로 연 비공개 프로필에는 없음) */}
+                        {!isOwner && !preview && isPublic && (
+                            <div ref={shareMenuRef} className="relative">
+                                <button onClick={handleNativeShare} title="프로필 공유"
+                                    className="flex items-center gap-1.5 text-xs tn-text-sub border tn-border rounded-lg px-3 py-1.5 cursor-pointer">
+                                    <Share2 className="h-3.5 w-3.5" /> 공유
+                                </button>
                                 {showShareMenu && (
-                                    <div
-                                        className="absolute right-0 top-8 z-50 rounded-xl overflow-hidden shadow-xl"
-                                        style={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.12)', minWidth: '180px' }}>
-                                        <button
-                                            onClick={handleShareCopy}
-                                            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-neutral-300 hover:bg-white/5 transition-colors">
-                                            {copied ? <CheckCircle2 className="h-3.5 w-3.5 text-green-400" /> : <LinkIcon className="h-3.5 w-3.5 text-neutral-500" />}
-                                            {copied ? '복사됨!' : '링크 복사'}
+                                    <div className="absolute right-0 top-9 z-50 rounded-xl overflow-hidden shadow-xl border tn-border tn-surface min-w-[160px]">
+                                        <button onClick={handleShareCopy}
+                                            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-xs tn-text hover:opacity-70">
+                                            {copied ? <CheckCircle2 className="h-3.5 w-3.5" /> : <LinkIcon className="h-3.5 w-3.5" />}
+                                            {copied ? '복사됨' : '링크 복사'}
                                         </button>
-                                        <a
-                                            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${profile?.name}의 Universe 프로필`)}&url=${encodeURIComponent(profileUrl)}`}
-                                            target="_blank" rel="noopener noreferrer"
-                                            onClick={() => setShowShareMenu(false)}
-                                            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-neutral-300 hover:bg-white/5 transition-colors">
-                                            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                                            X(트위터)
-                                        </a>
-                                        <a
-                                            href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}`}
-                                            target="_blank" rel="noopener noreferrer"
-                                            onClick={() => setShowShareMenu(false)}
-                                            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-neutral-300 hover:bg-white/5 transition-colors">
-                                            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                                            LinkedIn
-                                        </a>
-                                        <a
-                                            href={`https://facebook.com/sharer/sharer.php?u=${encodeURIComponent(profileUrl)}`}
-                                            target="_blank" rel="noopener noreferrer"
-                                            onClick={() => setShowShareMenu(false)}
-                                            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-neutral-300 hover:bg-white/5 transition-colors">
-                                            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                                            Facebook
-                                        </a>
                                     </div>
                                 )}
                             </div>
                         )}
-                    </div>
-
-                    {/* 아바타 */}
-                    <div className="absolute bottom-0 left-8 translate-y-1/2">
-                        <div className="relative group/avatar">
-                            {(pendingAvatar?.previewUrl || profile.avatarUrl) ? (
-                                <Image
-                                    src={pendingAvatar?.previewUrl || profile.avatarUrl!}
-                                    alt={profile.name || ''}
-                                    width={80} height={80}
-                                    unoptimized={!!pendingAvatar}
-                                    className={`h-20 w-20 rounded-full border-4 shadow-lg object-cover transition-all ${
-                                        pendingAvatar ? 'border-blue-400' : 'border-white'
-                                    }`} />
-                            ) : (
-                                <div className="h-20 w-20 rounded-full bg-neutral-900 border-4 border-white flex items-center justify-center text-xl font-bold text-white shadow-lg">
-                                    {initials}
-                                </div>
-                            )}
-                            {isOwner && !pendingAvatar && (
-                                <button onClick={() => fileInputRef.current?.click()}
-                                    className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity cursor-pointer">
-                                    <Camera className="h-5 w-5 text-white" />
-                                </button>
-                            )}
-                            {pendingAvatar && (
-                                <>
-                                    <button onClick={handleAvatarCancel} title="취소"
-                                        className="absolute -bottom-1 -left-1 h-6 w-6 rounded-full bg-neutral-800 border-2 border-white flex items-center justify-center hover:bg-neutral-700 active:scale-95 transition-all cursor-pointer shadow-md z-10">
-                                        <X className="h-3 w-3 text-white" />
-                                    </button>
-                                    <button onClick={handleAvatarConfirm} disabled={avatarUploading} title="저장"
-                                        className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center hover:bg-emerald-400 active:scale-95 transition-all cursor-pointer shadow-md z-10 disabled:opacity-60">
-                                        {avatarUploading
-                                            ? <div className="h-2.5 w-2.5 border border-white/40 border-t-white rounded-full animate-spin" />
-                                            : <Check className="h-3 w-3 text-white" />}
-                                    </button>
-                                </>
-                            )}
-                            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── 이름 + 편집 버튼 행 ── */}
-                <div className="px-8 pt-12 pb-0 flex items-start justify-between">
-                    <div>
-                        <h1 className="text-xl font-bold tn-text">{profile.name}</h1>
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                            {profile.handle && <p className="text-xs tn-text-sub">@{profile.handle}</p>}
-                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${isStaff ? 'bg-neutral-900 text-white' : 'bg-neutral-200 text-neutral-700'}`}>
-                                {isStaff ? 'Staff' : 'Member'}
-                            </span>
-                        </div>
-                    </div>
-                    {isOwner && !editing && (
-                        <div className="flex items-center gap-1.5 mt-1 shrink-0">
-                            {/* 공개 설정 토글 */}
-                            <button
-                                onClick={toggleVisibility}
-                                disabled={visibilityUpdating}
-                                title={isPublic ? '공개 — 클릭해서 비공개로 전환' : '비공개 — 클릭해서 공개로 전환'}
-                                className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-lg border transition-colors cursor-pointer ${
-                                    isPublic
-                                        ? 'text-emerald-600 border-emerald-500/30 bg-emerald-50 hover:bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-950/30 dark:border-emerald-500/30 dark:hover:bg-emerald-950/50'
-                                        : 'tn-text-sub tn-border hover:bg-neutral-100 dark:hover:bg-neutral-800'
-                                }`}>
-                                {isPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-                                {isPublic ? '공개' : '비공개'}
-                            </button>
-                            {/* 미리보기 */}
-                            <button onClick={openPreview}
-                                title="외부인 뷰로 미리보기"
-                                className="flex items-center gap-1 text-[11px] tn-text-sub border tn-border px-2.5 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer">
-                                <Eye className="h-3 w-3" /> 미리보기
-                            </button>
-                            {/* 수정 */}
+                        {isOwner && !editing && (
                             <button onClick={startEditing}
-                                className="flex items-center gap-1 text-[11px] tn-text-sub border tn-border px-2.5 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer">
+                                className="flex items-center gap-1 text-xs tn-text-sub border tn-border px-3 py-1.5 rounded-lg cursor-pointer">
                                 <Pencil className="h-3 w-3" /> 수정
                             </button>
-                        </div>
-                    )}
-                    {isOwner && editing && (
-                        <div className="flex items-center gap-2 mt-1 shrink-0">
-                            <button onClick={saveEditing}
-                                disabled={handleChecking || (handleError !== '' && editForm.handle.trim() !== '')}
-                                className="text-xs text-white bg-neutral-900 px-3 py-1.5 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50">
-                                <Check className="h-3 w-3" /> 저장
-                            </button>
-                            <button onClick={() => setEditing(false)}
-                                className="text-xs tn-text-sub border tn-border px-3 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors flex items-center gap-1.5 cursor-pointer">
-                                <X className="h-3 w-3" /> 취소
-                            </button>
-                        </div>
-                    )}
+                        )}
+                        {isOwner && editing && (
+                            <>
+                                <button onClick={saveEditing}
+                                    className="text-xs px-3 py-1.5 rounded-lg tn-btn-primary flex items-center gap-1.5 cursor-pointer">
+                                    <Check className="h-3 w-3" /> 저장
+                                </button>
+                                <button onClick={() => setEditing(false)}
+                                    className="text-xs tn-text-sub border tn-border px-3 py-1.5 rounded-lg cursor-pointer">
+                                    취소
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
+                {isOwner && saveError && <p role="alert" className="px-8 pt-3 text-xs text-red-500">{saveError}</p>}
 
                 {/* ── 상세 정보 영역 ── */}
                 <div className="px-8 py-5">
@@ -909,27 +736,6 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                                 onChange={e => setEditForm(f => ({ ...f, bio: e.target.value }))}
                                 rows={3} placeholder="자유롭게 자신을 소개해주세요."
                                 className="w-full text-sm tn-text bg-transparent border tn-border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-neutral-400 resize-none" />
-                        </div>
-
-                        {/* 개인 ID (handle) */}
-                        <div>
-                            <div className="text-[10px] font-medium uppercase tracking-wider tn-text-sub mb-1">개인 ID (@username)</div>
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm tn-text-sub">@</span>
-                                <input value={editForm.handle}
-                                    onChange={e => setEditForm(f => ({ ...f, handle: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20) }))}
-                                    placeholder="your-handle"
-                                    className="w-full text-sm tn-text bg-transparent border tn-border rounded-lg pl-7 pr-9 py-1.5 focus:outline-none focus:ring-1 focus:ring-neutral-400" />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2">
-                                    {handleChecking && <div className="h-3.5 w-3.5 border border-neutral-400 border-t-transparent rounded-full animate-spin" />}
-                                    {!handleChecking && handleAvailable === true && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />}
-                                    {!handleChecking && handleAvailable === false && <AlertCircle className="h-3.5 w-3.5 text-red-500" />}
-                                </span>
-                            </div>
-                            {handleError && <p className="text-[11px] text-red-500 mt-1">{handleError}</p>}
-                            {!handleError && handleAvailable === true && <p className="text-[11px] text-emerald-600 mt-1">사용 가능한 ID입니다.</p>}
-                            {!handleError && handleAvailable === false && editForm.handle && <p className="text-[11px] text-red-500 mt-1">이미 사용 중인 ID입니다.</p>}
-                            <p className="text-[10px] tn-text-sub mt-0.5">URL: tenone.biz/@{editForm.handle || 'your-handle'}</p>
                         </div>
 
                         {/* 관심 분야 */}
@@ -970,50 +776,6 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                             </div>
                         </div>
 
-                        {/* 공개 범위 설정 */}
-                        <div className="border-t tn-border pt-4 mt-2 space-y-3">
-                            <div className="text-[10px] font-semibold uppercase tracking-wider tn-text-sub flex items-center gap-1.5">
-                                <Eye className="h-3 w-3" /> 공개 범위 설정
-                            </div>
-                            <p className="text-[11px] tn-text-sub -mt-1">공개 프로필에서 외부에 보여줄 항목을 선택하세요.</p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-                                {[
-                                    { key: 'email',      label: '이메일' },
-                                    { key: 'phone',      label: '연락처' },
-                                    { key: 'company',    label: '소속' },
-                                    { key: 'bio',        label: '자기소개' },
-                                    { key: 'socialLinks',label: '소셜 링크' },
-                                    { key: 'hero',       label: 'HeRo 활동' },
-                                    { key: 'badak',      label: 'Badak 활동' },
-                                    { key: 'madleague',  label: 'MAD League 활동' },
-                                    { key: 'madleap',    label: 'MAD Leap 활동' },
-                                    { key: 'youinone',   label: 'YouInOne 활동' },
-                                ].map(({ key, label }) => {
-                                    const isOn = !!editForm.privacySettings[key];
-                                    const toggle = () => setEditForm(f => ({
-                                        ...f,
-                                        privacySettings: { ...f.privacySettings, [key]: !f.privacySettings[key] }
-                                    }));
-                                    return (
-                                        <div key={key}
-                                            className="flex items-center justify-between gap-3 cursor-pointer group"
-                                            onClick={toggle}>
-                                            <span className="text-xs tn-text group-hover:opacity-80 select-none">{label}</span>
-                                            <button type="button" role="switch" aria-checked={isOn}
-                                                onClick={e => { e.stopPropagation(); toggle(); }}
-                                                className={`relative w-9 h-5 rounded-full transition-colors shrink-0 focus:outline-none ${
-                                                    isOn ? 'bg-emerald-500' : 'bg-neutral-500/40'
-                                                }`}>
-                                                <span className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
-                                                    isOn ? 'translate-x-4' : 'translate-x-0'
-                                                }`} />
-                                            </button>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
                         {/* 비밀번호 변경 (편집 모드 내) */}
                         <div className="border-t tn-border pt-4 mt-4">
                             <button onClick={() => setPwdOpen(!pwdOpen)}
@@ -1047,7 +809,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                             const ps = profile.privacySettings || {};
                             const showEmail   = isOwner || !!profile.email;   // 본인이 켠 경우에만 값이 온다
                             const showPhone       = isOwner;                  // 연락처는 공개 대상 아님
-                            const showCompany     = isOwner || ps.company     !== false;
+                            const showCompany     = isOwner || (ps.company !== false && !!profile.company);   // 방문자에게 빈 칸(-)은 보이지 않는다
                             const showBio         = isOwner || ps.bio         !== false;
                             const showSocialLinks = isOwner || ps.socialLinks !== false;
                             const phone = user?.phone ?? (profile as PublicProfileData & { phone?: string }).phone;
@@ -1085,20 +847,17 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                                                         <div className="text-[10px] font-medium uppercase tracking-wider tn-text-sub mb-2">경력 정보</div>
                                                         <div className="flex flex-wrap gap-2">
                                                             {careerJob && (
-                                                                <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full font-medium"
-                                                                    style={{ backgroundColor: '#f59e0b18', color: '#f59e0b' }}>
+                                                                <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full border tn-border tn-text">
                                                                     <Briefcase className="h-3 w-3" /> {careerJob}
                                                                 </span>
                                                             )}
                                                             {careerIndustry && (
-                                                                <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full font-medium"
-                                                                    style={{ backgroundColor: '#8b5cf618', color: '#8b5cf6' }}>
+                                                                <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full border tn-border tn-text">
                                                                     <Building2 className="h-3 w-3" /> {careerIndustry}
                                                                 </span>
                                                             )}
                                                             {careerLevel && (
-                                                                <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full font-medium"
-                                                                    style={{ backgroundColor: '#64748b18', color: '#64748b' }}>
+                                                                <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full border tn-border tn-text">
                                                                     <Clock className="h-3 w-3" /> {careerLevel}
                                                                 </span>
                                                             )}
@@ -1179,8 +938,8 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                 {/* ── HeRo 유형 ── */}
                 {heroProfile && (isOwner || (profile?.privacySettings?.hero === true)) && (
                     <div className="px-8 py-5 border-t tn-border">
-                        <h2 className="text-xs font-semibold text-neutral-700 mb-4 flex items-center gap-2">
-                            <Users className="h-3.5 w-3.5 tn-text-sub" style={{ color: '#dc2626' }} /> HeRo 영웅 유형
+                        <h2 className="text-xs font-semibold tn-text mb-4 flex items-center gap-2">
+                            <Users className="h-3.5 w-3.5 tn-text-sub" /> HeRo 영웅 유형
                         </h2>
                         <div className="flex items-start gap-4">
                             {heroType && (
@@ -1210,8 +969,8 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                 {/* ── Badak 활동 ── */}
                 {badakActivity && (isOwner || (profile?.privacySettings?.badak === true)) && (badakActivity.ledGroups.length > 0 || badakActivity.joinedGroups.length > 0) && (
                     <div className="px-8 py-5 border-t tn-border">
-                        <h2 className="text-xs font-semibold text-neutral-700 mb-4 flex items-center gap-2">
-                            <Briefcase className="h-3.5 w-3.5 tn-text-sub" style={{ color: '#f59e0b' }} /> Badak 활동
+                        <h2 className="text-xs font-semibold tn-text mb-4 flex items-center gap-2">
+                            <Briefcase className="h-3.5 w-3.5 tn-text-sub" /> Badak 활동
                         </h2>
                         {badakActivity.ledGroups.length > 0 && (
                             <div className="mb-4">
@@ -1282,8 +1041,8 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                     }, {});
                     return (
                         <div className="px-8 py-5 border-t tn-border">
-                            <h2 className="text-xs font-semibold text-neutral-700 mb-4 flex items-center gap-2">
-                                <Sparkles className="h-3.5 w-3.5" style={{ color: '#3b82f6' }} /> 서비스 권한
+                            <h2 className="text-xs font-semibold tn-text mb-4 flex items-center gap-2">
+                                <Sparkles className="h-3.5 w-3.5 tn-text-sub" /> 서비스 권한
                             </h2>
                             <div className="space-y-2.5">
                                 {Object.entries(grouped).map(([brandId, roles]) => {
@@ -1317,7 +1076,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                 {/* ── 직원 정보 ── */}
                 {isOwner && isStaff && (
                     <div className="px-8 py-5 border-t tn-border">
-                        <h2 className="text-xs font-semibold text-neutral-700 mb-4 flex items-center gap-2">
+                        <h2 className="text-xs font-semibold tn-text mb-4 flex items-center gap-2">
                             <Shield className="h-3.5 w-3.5" /> 직원 정보
                         </h2>
                         <p className="text-[10px] text-neutral-400 mb-3">직원 정보는 관리자만 수정할 수 있습니다.</p>
@@ -1337,9 +1096,6 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
             {/* ════════════════════════════════
                 유니버스 서비스 (소유자만, 아코디언)
             ════════════════════════════════ */}
-            {/* 공개·공유 관리 (본인만) */}
-            {isOwner && user && <ProfilePublishPanel />}
-
             {/* 방명록 등 슬롯 */}
             {children}
 

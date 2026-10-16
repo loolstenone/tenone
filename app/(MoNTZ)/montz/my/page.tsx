@@ -58,7 +58,7 @@ export default function MoNTZMyPage() {
     // posts는 기존 로직 그대로
     useEffect(() => {
         if (!user?.id) return;
-        fetch(`/api/board/posts?site=montz&limit=20&status=published`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
+        fetch(`/api/board/posts?site=montz&limit=20&status=published&author_id=${encodeURIComponent(user.id)}`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
     }, [user?.id]);
 
     // 활성 탭 변경 시 lazy fetch

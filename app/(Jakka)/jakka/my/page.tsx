@@ -39,7 +39,7 @@ export default function JakkaMyPage() {
 
     useEffect(() => {
         if (!user?.id) return;
-        fetch(`/api/board/posts?site=jakka&limit=20&status=published`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
+        fetch(`/api/board/posts?site=jakka&limit=20&status=published&author_id=${encodeURIComponent(user.id)}`).then(r => r.json()).then(d => setMyPosts(d.posts || [])).catch(() => {});
         getMyCreatorProfile(user.authId ?? user.id).then(setCreator);
     }, [user?.id]);
 

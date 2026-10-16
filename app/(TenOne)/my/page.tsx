@@ -36,8 +36,8 @@ export default function MyPage() {
         if (!user?.id) return;
         setLoading(true);
 
-        // 내 게시글 (TODO: author_id 필터 API 추가 필요)
-        fetch(`/api/board/posts?site=tenone&limit=20&status=published`)
+        // 내 게시글 = 내가 쓴 글만 (author_id = members.id)
+        fetch(`/api/board/posts?site=tenone&limit=20&status=published&author_id=${encodeURIComponent(user.id)}`)
             .then(r => r.json())
             .then(d => setMyPosts(d.posts || []))
             .catch(() => {});
