@@ -105,7 +105,7 @@ export function FormRenderer({ brand, slug, accent = "#EC1D25", dark = false }: 
         setErrors(errs);
         if (Object.keys(errs).length) { setSubmitError("빨간 표시 항목을 확인해 주세요."); return; }
         if (!agreed) { setSubmitError("개인정보 수집·이용에 동의해 주세요."); return; }
-        if (!captcha.ready) { setSubmitError(CAPTCHA_PENDING_MESSAGE); return; }
+        if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
 
         setSubmitting(true);
         try {

@@ -25,7 +25,7 @@ export default function WIOLoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+    if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
     setError(''); setLoading(true);
     const sb = createClient();
     // signOut 하지 않음 — 다른 사이트 세션 유지
@@ -69,7 +69,7 @@ export default function WIOLoginPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+    if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
     setError(''); setLoading(true);
     if (password.length < 6) { setError('비밀번호는 6자 이상이어야 합니다.'); setLoading(false); return; }
     const sb = createClient();

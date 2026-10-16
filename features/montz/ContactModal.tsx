@@ -47,10 +47,7 @@ export function ContactModal({ isOpen, onClose, targetCreatorId, targetDisplayNa
             setError("올바른 이메일 형식이 아닙니다.");
             return;
         }
-        if (!captcha.ready) {
-            setError(CAPTCHA_PENDING_MESSAGE);
-            return;
-        }
+        if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
 
         setSubmitting(true);
         try {

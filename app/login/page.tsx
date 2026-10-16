@@ -66,7 +66,7 @@ function SmarCommLoginForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+        if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
         try {
             await login(email, password, captcha.token);
             captcha.reset();
@@ -171,7 +171,7 @@ function LoginForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+        if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
         setIsSubmitting(true);
         try {
             const result = await login(email, password, captcha.token);

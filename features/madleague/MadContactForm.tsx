@@ -107,7 +107,7 @@ export function MadContactForm({ initialTopic }: { initialTopic?: string }) {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+    if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
     if (!topic) { setError('문의 유형을 선택해 주세요.'); return; }
     // 템플릿 제목만 남기고 아무것도 안 쓴 경우
     if (message.replace(/■[^\n]*/g, '').trim() === '') { setError('문의 내용을 입력해 주세요.'); return; }

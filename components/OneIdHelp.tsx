@@ -33,6 +33,12 @@ export function OneIdHelp({ size = 14 }: { size?: number }) {
         <HelpPopover title="One ID" label="One ID 안내" size={size} onOpen={load}>
             Ten:One™ Universe의 모든 서비스를 하나의 아이디로 이용할 수 있습니다. 한 번 만든 One ID로 다른 서비스에도 따로 가입하지 않고 로그인하세요.
 
+            <span className="mt-3 block text-[11px] font-semibold text-neutral-500">One ID = 가입한 이메일</span>
+            <span className="mt-1 block">
+                이메일과 비밀번호로 로그인합니다. Google·카카오로 가입했다면 그 버튼으로 로그인하세요.
+                @핸들은 프로필 주소일 뿐 로그인에는 쓰지 않습니다.
+            </span>
+
             <span className="mt-3 block text-[11px] font-semibold text-neutral-500">주요 서비스</span>
             <span className="mt-1 flex flex-wrap gap-1.5">
                 {services === null && <span className="text-[11px] text-neutral-400">불러오는 중…</span>}

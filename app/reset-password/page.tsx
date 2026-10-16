@@ -56,7 +56,7 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setError(''); setSuccess(''); setNotFound(false);
     if (!email.trim()) { setError('이메일을 입력해주세요'); return; }
-    if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+    if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
     setIsSubmitting(true);
     // 로그인 도움 — 소셜 가입이면 가입 방식 안내, 이메일 가입이면 재설정 링크를 그 메일함으로만 (/api/auth/login-help)
     const res = await fetch('/api/auth/login-help', {

@@ -49,7 +49,7 @@ export default function NewsletterSubscribeForm({
     if (!email.trim() || !isValidEmail(email)) { setEmailError('유효한 이메일 주소를 입력해주세요.'); valid = false; }
     else setEmailError('');
     if (!agree || !valid) return;
-    if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+    if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
 
     setLoading(true);
     setError('');

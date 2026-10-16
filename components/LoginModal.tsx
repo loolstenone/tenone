@@ -63,7 +63,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
-        if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+        if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
         setIsSubmitting(true);
         try {
             const result = await login(email, password, captcha.token);
@@ -81,7 +81,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
         if (password.length < 6) { setError("비밀번호는 6자 이상이어야 합니다"); return; }
         if (password !== passwordConfirm) { setError("비밀번호가 일치하지 않습니다"); return; }
         if (!isConsentValid(consent)) { setError(CONSENT_REQUIRED_MESSAGE); return; }
-        if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+        if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
         setIsSubmitting(true);
         try {
             const result = await register(name, email, password, buildMemberConsent(consent, "email"), captcha.token);
@@ -178,7 +178,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
                             </div>
-                            <CaptchaWidget {...captcha.widgetProps} />
+                            <CaptchaWidget {...captcha.widgetProps} theme="light" hideStatus />
                             {error && <p className="text-sm text-red-500">{error}</p>}
                             {/* 2번 이상 실패 — 소셜로 가입했는데 이메일로 시도하는 경우가 많다 */}
                             {failCount >= 2 && (
@@ -191,7 +191,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                             <button type="submit" disabled={isSubmitting}
                                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50"
                                 style={{ backgroundColor: accentColor }}>
-                                {isSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                {isSubmitting || captcha.waiting ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{captcha.waiting && "보안 확인 중…"}</span>
                                     : "로그인"}
                             </button>
                         </form>
@@ -231,12 +231,12 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                                     className={`${inputClass} ${passwordConfirm && password !== passwordConfirm ? 'border-red-400' : ''}`} required />
                                 {passwordConfirm && password !== passwordConfirm && <p className="text-xs text-red-500">비밀번호가 일치하지 않습니다</p>}
                                 <SignupConsent value={consent} onChange={setConsent} accentColor={accentColor} />
-                                <CaptchaWidget {...captcha.widgetProps} />
+                                <CaptchaWidget {...captcha.widgetProps} theme="light" hideStatus />
                                 {error && <p className="text-sm text-red-500">{error}</p>}
                                 <button type="submit" disabled={isSubmitting}
                                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50"
                                     style={{ backgroundColor: accentColor }}>
-                                    {isSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    {isSubmitting || captcha.waiting ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{captcha.waiting && "보안 확인 중…"}</span>
                                         : "가입하기"}
                                 </button>
                             </form>

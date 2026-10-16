@@ -22,7 +22,7 @@ export function IntraLoginScreen({ noAccess = false }: { noAccess?: boolean }) {
         async (e: React.FormEvent) => {
             e.preventDefault();
             setError("");
-            if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+            if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
             setSubmitting(true);
 
             try {
@@ -122,14 +122,15 @@ export function IntraLoginScreen({ noAccess = false }: { noAccess?: boolean }) {
                             {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
                     </div>
-                    <CaptchaWidget {...captcha.widgetProps} />
+                    <CaptchaWidget {...captcha.widgetProps} theme="dark" hideStatus />
                     {error && <p className="text-xs text-red-400">{error}</p>}
                     <button
                         type="submit"
                         disabled={submitting || !email || !password}
-                        className="w-full py-3 bg-white text-neutral-900 text-sm font-medium rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="w-full py-3 bg-white text-neutral-900 text-sm font-medium rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        {submitting ? "인증 중..." : "로그인"}
+                        {(submitting || captcha.waiting) && <span className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" aria-hidden />}
+                        {captcha.waiting ? "보안 확인 중…" : submitting ? "인증 중..." : "로그인"}
                     </button>
                 </form>
 

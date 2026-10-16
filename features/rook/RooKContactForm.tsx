@@ -46,7 +46,7 @@ function RooKContactForm({ kind, onDone }: { kind: Kind; onDone: () => void }) {
 
     async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        if (!captcha.ready) { alert(CAPTCHA_PENDING_MESSAGE); return; }
+        if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
         const meta = files.map(f => ({ name: f.name, size: f.size, type: f.type }));
         const invalid = validateAttachments(meta);
         if (invalid) { alert(invalid); return; }

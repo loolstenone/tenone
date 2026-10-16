@@ -401,7 +401,7 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr('');
-    if (!captcha.ready) { setErr(CAPTCHA_PENDING_MESSAGE); return; }
+    if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
     setLoading(true);
     const { error } = await createClient().auth.signInWithPassword({ email, password: pw, options: { captchaToken: captcha.token } });
     captcha.reset();

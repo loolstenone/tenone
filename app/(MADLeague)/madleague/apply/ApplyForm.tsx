@@ -49,7 +49,7 @@ export function ApplyForm({ clubs, preselectedClub, industries = [...INDUSTRIES_
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+    if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
     setSubmitting(true);
     const fd = new FormData(e.currentTarget);
     const body = {

@@ -59,7 +59,7 @@ function SmarCommSignupForm() {
         if (password.length < 6) { setError('비밀번호는 6자 이상이어야 합니다'); return; }
         if (password !== passwordConfirm) { setError('비밀번호가 일치하지 않습니다'); return; }
         if (!isConsentValid(consent)) { setError(CONSENT_REQUIRED_MESSAGE); return; }
-        if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+        if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
         setIsSubmitting(true);
         try {
             const result = await register(email.split('@')[0], email, password, buildMemberConsent(consent, 'email'), captcha.token);
@@ -265,7 +265,7 @@ function TenOneSignupPage() {
         if (password.length < 6) { setError('비밀번호는 6자 이상이어야 합니다'); return; }
         if (password !== passwordConfirm) { setError('비밀번호가 일치하지 않습니다'); return; }
         if (!isConsentValid(consent)) { setError(CONSENT_REQUIRED_MESSAGE); return; }
-        if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+        if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
         setIsSubmitting(true);
         try {
             const urlParams = new URLSearchParams(window.location.search);

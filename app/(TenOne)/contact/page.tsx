@@ -156,7 +156,7 @@ function ContactContent() {
     }, [fromParam]);
 
     const handleSubmit = async (formType: string, form: HTMLFormElement) => {
-        if (!captcha.ready) { alert(CAPTCHA_PENDING_MESSAGE); return; }
+        if (!captcha.ready) { captcha.waitThenSubmit({ currentTarget: form }); return; }
         setSubmitting(true);
         const fd = new FormData(form);
         const body: Record<string, unknown> = {

@@ -205,7 +205,7 @@ function ManualForm({ onDone }: { onDone: (list: PtCertificate[]) => void }) {
 
     async function submit(e: React.FormEvent) {
         e.preventDefault();
-        if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+        if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
         setBusy(true); setError(null);
         const res = await fetch("/api/madleague/certificates/find", {
             method: "POST", headers: { "Content-Type": "application/json" },

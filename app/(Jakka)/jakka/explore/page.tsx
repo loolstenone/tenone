@@ -148,7 +148,7 @@ function AdInquiryBanner() {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!form.name || !form.email) return;
-        if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
+        if (!captcha.ready) { captcha.waitThenSubmit(e); return; }
         setSubmitting(true);
         setError(null);
         try {
