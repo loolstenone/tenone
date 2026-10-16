@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { ChevronLeft, Eye, Heart, MessageCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { ArticleActions } from './ArticleActions';
@@ -42,7 +42,8 @@ export default async function ArticlePage({ params }: PageProps) {
   const sb = await createClient();
 
   const { data } = await sb.from('mad_articles').select('*').eq('slug', slug).eq('is_published', true).maybeSingle();
-  if (!data) notFound();
+  // 옛 아임웹 글(mz-{idx}) 중 옮기지 않은 글 → 목록 (lib/madleague-legacy-redirects.ts)
+  if (!data) { if (slug.startsWith('mz-')) permanentRedirect('/madleague/madzine'); notFound(); }
 
   const article = data as {
     id: string; slug: string; title: string; subtitle: string | null; content: string;

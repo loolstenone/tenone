@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { MadzineArticleBody } from '@/features/madleague/MadzineArticleBody';
 import { MZ_KICKER, MZ_RULE, MZ_SERIF, formatMzDate } from '@/features/madleague/MadzineUI';
@@ -22,8 +22,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /** 공모전/프로젝트 글 — 본문은 이전한 HTML (MadzineArticleBody가 정화·YouTube만 허용) */
 export default async function ContestPostPage({ params }: Props) {
-    const post = await getContestPost((await params).slug);
-    if (!post) notFound();
+    const slug = (await params).slug;
+    const post = await getContestPost(slug);
+    // 옛 아임웹 글 중 옮기지 않은 글(채용 공고 등) → 목록
+    if (!post) { if (slug.startsWith('mp-')) permanentRedirect('/madleague/madzine/contest'); notFound(); }
 
     return (
         <article className="bg-black text-white min-h-screen">
