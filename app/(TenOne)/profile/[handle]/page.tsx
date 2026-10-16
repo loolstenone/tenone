@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { ArrowLeft, Link2, Lock, LogIn } from 'lucide-react';
+import { ArrowLeft, Link2, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { createClient as createAnonClient } from '@supabase/supabase-js';
 import { createClient as createServerClient } from '@/lib/supabase/server';
@@ -8,6 +8,7 @@ import { UniverseProfile } from '@/components/UniverseProfile';
 import { ProfileComments } from '@/components/ProfileComments';
 import { ProfileViewBeacon } from '@/components/profile/ProfileViewBeacon';
 import { ProfileReportButton } from '@/components/profile/ProfileReportButton';
+import { ProfileInvite } from '@/components/profile/ProfileInvite';
 import { HANDLE_RE, toPublicProfileData, type PublicProfileRow } from '@/lib/profile/public-profile';
 
 /**
@@ -100,22 +101,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
 
     const viaShare = !!row.via_share;
     if (row.profile_visibility !== 'public' && !viaShare) {
-        return (
-            <div className="max-w-2xl mx-auto py-16 px-4 text-center">
-                <div className="flex justify-center mb-4">
-                    <div className="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center">
-                        <Lock className="h-7 w-7 text-neutral-400" />
-                    </div>
-                </div>
-                <h1 className="text-lg font-bold tn-text mb-2">비공개 프로필</h1>
-                <p className="text-sm tn-text-sub">
-                    {share ? '공유 링크의 기한이 지났거나 회수되었습니다.' : `@${h}님의 프로필은 비공개로 설정되어 있습니다.`}
-                </p>
-                <Link href="/" className="inline-flex items-center gap-1 mt-6 text-sm tn-text-sub hover:tn-text transition-colors">
-                    <ArrowLeft className="h-4 w-4" /> 홈으로
-                </Link>
-            </div>
-        );
+        return <ProfileInvite variant={share ? 'expired' : 'private'} handle={h} />;
     }
 
     const publicData = toPublicProfileData(row, h);

@@ -133,12 +133,12 @@ export function ProfilePublishPanel() {
             {publicUrl && (
                 <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
-                        <code className="text-xs tn-text bg-neutral-100 dark:bg-neutral-800 rounded-lg px-3 py-1.5 break-all">{publicUrl.replace(/^https?:\/\//, "")}</code>
-                        <button onClick={() => copy(publicUrl, "public")} className="flex items-center gap-1 text-[11px] tn-text-sub border tn-border px-2.5 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800">
+                        <code className="text-xs tn-text tn-bg-alt rounded-lg px-3 py-1.5 break-all">{publicUrl.replace(/^https?:\/\//, "")}</code>
+                        <button onClick={() => copy(publicUrl, "public")} className="flex items-center gap-1 text-[11px] tn-text-sub border tn-border px-2.5 py-1.5 rounded-lg">
                             {copied === "public" ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />} 주소 복사
                         </button>
                         <button onClick={() => showQr(publicUrl)} disabled={!isPublic} title={isPublic ? "" : "비공개일 때는 공유 링크로 QR을 만드세요"}
-                            className="flex items-center gap-1 text-[11px] tn-text-sub border tn-border px-2.5 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 disabled:opacity-40">
+                            className="flex items-center gap-1 text-[11px] tn-text-sub border tn-border px-2.5 py-1.5 rounded-lg disabled:opacity-40">
                             <QrCode className="h-3 w-3" /> QR
                         </button>
                     </div>
@@ -174,13 +174,13 @@ export function ProfilePublishPanel() {
                         {DAY_OPTIONS.map(o => <option key={o.days} value={o.days}>{o.label}</option>)}
                     </select>
                     <button onClick={createLink} disabled={busy || !handle}
-                        className="text-[11px] font-medium px-3 py-1.5 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 disabled:opacity-40">
+                        className="text-[11px] font-medium px-3 py-1.5 rounded-lg tn-btn-primary disabled:opacity-40">
                         링크 만들기
                     </button>
                 </div>
                 {newLink && (
-                    <div className="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/30 p-3 space-y-2">
-                        <p className="text-[11px] text-amber-800 dark:text-amber-300">이 주소는 지금 한 번만 보입니다. 복사해 두세요.</p>
+                    <div className="rounded-xl border border-amber-300 p-3 space-y-2">
+                        <p className="text-[11px] text-amber-600">이 주소는 지금 한 번만 보입니다. 복사해 두세요.</p>
                         <code className="block text-[11px] break-all tn-text">{newLink}</code>
                         <div className="flex gap-2">
                             <button onClick={() => copy(newLink, "new")} className="flex items-center gap-1 text-[11px] tn-text-sub border tn-border px-2.5 py-1 rounded-lg">

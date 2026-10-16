@@ -388,6 +388,8 @@ body.pp-ai-panel-open .pp-hide-when-ai-open { display: none !important; }
   transition: background-color 0.3s ease;
 }
 .tn-themed .tn-card:hover { background-color: var(--tn-card-hover); }
+/* 주 버튼 — 사이트 테마 토글(data-theme)을 따른다 (Tailwind dark:는 OS 설정을 따라 어긋난다) */
+.tn-themed .tn-btn-primary { background-color: var(--tn-accent); color: var(--tn-bg); }
 
 /* ── Intra 공통 디자인 시스템 ── */
 

@@ -485,6 +485,19 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
         return () => clearTimeout(timer);
     }, [editForm.handle, user?.handle, user?.id]);
 
+    /* ── 다른 화면에서 '이 핸들 가져가기'로 왔을 때 (/profile?handle=…) — 편집을 열고 핸들을 채워 둔다 ── */
+    const claimChecked = useRef(false);
+    useEffect(() => {
+        if (!isOwner || !user || claimChecked.current) return;
+        claimChecked.current = true;
+        const want = new URLSearchParams(window.location.search).get('handle')?.toLowerCase() ?? '';
+        if (!/^[a-z0-9_]{3,20}$/.test(want) || want === user.handle) return;
+        startEditing();
+        setEditForm(f => ({ ...f, handle: want }));
+        window.history.replaceState(null, '', window.location.pathname);
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- 첫 진입 1회
+    }, [isOwner, user]);
+
     if (!profile) return null;
 
     const initials = profile.name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || '?';
@@ -715,7 +728,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
         )}
         <div className="space-y-5">
             {isOwner && ownerNotice && (
-                <p role="alert" className="text-xs text-red-600 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl px-4 py-3">{ownerNotice}</p>
+                <p role="alert" className="text-xs text-red-600 border border-red-300 rounded-xl px-4 py-3">{ownerNotice}</p>
             )}
 
             {/* ════════════════════════════════
