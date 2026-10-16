@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { HelpPopover } from "@/components/HelpPopover";
 import { getAllSiteConfigs, type SiteConfigRow } from "@/lib/supabase/site-configs";
-import { CANONICAL_HOSTS, isTenoneFamily } from "@/lib/domain-registry";
+import { CANONICAL_HOSTS } from "@/lib/domain-registry";
 
 /**
  * One ID 안내 — 유니버스를 강조하지 않고(헌법 원칙 7) 궁금할 때만 알 수 있게. LoginModal · BrandJoinGate에서 사용.
@@ -15,8 +15,9 @@ const INTERNAL_SITES = new Set(["tenone", "wiki", "dokdae"]);
 function universeHref(): string {
     if (typeof window === "undefined") return "https://www.tenone.biz/universe";
     const host = window.location.hostname;
-    // tenone 계열·로컬은 같은 사이트 경로, 독립 도메인은 공식 주소 (상대 경로는 브랜드 prefix로 rewrite돼 404)
-    return host === "localhost" || isTenoneFamily(host) ? "/universe" : "https://www.tenone.biz/universe";
+    // 같은 사이트 경로는 TenOne 주소·로컬에서만. 브랜드 서브도메인(madleague.tenone.biz 등)·독립 도메인은
+    // 상대 경로가 브랜드 prefix로 rewrite돼 404 → 공식 주소 (2026-10-16 madleague.tenone.biz에서 깨짐)
+    return host === "localhost" || host === "tenone.biz" || host === "www.tenone.biz" ? "/universe" : "https://www.tenone.biz/universe";
 }
 
 export function OneIdHelp({ size = 14 }: { size?: number }) {
