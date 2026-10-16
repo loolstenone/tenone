@@ -149,6 +149,7 @@ export const modules: NavModule[] = [
                             { name: "초대", href: "/intra/ums/members/invite" },
                             { name: "게스트", href: "/intra/ums/members/guests" },
                             { name: "개인정보", href: "/intra/ums/members/privacy" },
+                            { name: "프로필 신고", href: "/intra/ums/members/profile-reports" },
                         ],
                     },
                     {

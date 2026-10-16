@@ -164,7 +164,7 @@ function memberToUser(member: Record<string, unknown>): User {
 
         // 공개 프로필
         handle: member.handle as string | undefined,
-        profileVisibility: (member.profile_visibility as 'public' | 'private') || 'public',
+        profileVisibility: (member.profile_visibility as 'public' | 'private') || 'private',
         interestsIndustry: (member.interests_industry as string[]) || [],
         interestsJob: (member.interests_job as string[]) || [],
         privacySettings: (member.privacy_settings as import('@/types/auth').PrivacySettings) || undefined,

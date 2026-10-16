@@ -195,15 +195,13 @@ export async function getBadakActivity(userId: string, token?: string): Promise<
 }
 
 /* ── 핸들 고유값 체크 ── */
-export async function checkHandleAvailable(handle: string, currentUserId?: string): Promise<boolean> {
-    const { data } = await supabase
-        .from('members')
-        .select('id')
-        .eq('handle', handle)
-        .maybeSingle();
-    if (!data) return true;
-    if (currentUserId && data.id === currentUserId) return true;
-    return false;
+export async function checkHandleAvailable(handle: string, _currentUserId?: string): Promise<boolean> {
+    // 브라우저 조회는 RLS로 본인 행만 보여 남의 핸들이 늘 '사용 가능'으로 나왔다 → 서버 확인 API (예약어·형식·사용 중)
+    // 본인 현재 핸들과 같은 값은 호출하는 쪽에서 먼저 거른다
+    const res = await fetch(`/api/myverse/handle?check=${encodeURIComponent(handle.toLowerCase())}`);
+    if (!res.ok) return false;
+    const json = await res.json() as { available?: boolean };
+    return json.available === true;
 }
 
 /** 공개 프로필 조회 by handle */

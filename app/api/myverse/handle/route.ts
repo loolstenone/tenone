@@ -23,7 +23,7 @@ export async function GET(req: Request) {
 
     // 예약어 체크
     const { data: reserved } = await admin
-        .from("myverse_reserved_handles")
+        .from("universe_reserved_handles")   // 유니버스 공통 예약어 (DB 트리거 guard_member_handle과 같은 목록)
         .select("handle, reason")
         .eq("handle", handle)
         .maybeSingle();
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
 
     // 예약어 차단
     const { data: reserved } = await admin
-        .from("myverse_reserved_handles")
+        .from("universe_reserved_handles")
         .select("handle")
         .eq("handle", handle)
         .maybeSingle();

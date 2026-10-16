@@ -493,6 +493,16 @@ import { MyProfileCard } from "@/components/MyProfileCard";
 - ❌ 아바타/이름/이메일 직접 표시 (`MyProfileCard`가 전담)
 - ❌ `UniverseMembership` (레거시 — 전 사이트 제거 완료)
 
+### 공개 프로필·핸들 (2026-10-16 — `sql/profile-p0-privacy.sql`·`profile-p1-core.sql`)
+
+- **핸들 = 유니버스 하나** (`members.handle`, `^[a-z0-9_]{3,20}$`). 가입 시 무작위 `u_xxxxxxxx` → 본인이 변경. **로그인 ID로 쓰지 않는다** (공개 주소가 곧 로그인 ID가 되므로 핸들 로그인 폐지)
+- 예약어 = `universe_reserved_handles` 한 곳 (브랜드명·경로·운영 표기) — DB 트리거 `guard_member_handle`이 강제. 바꾼 핸들은 **7일에 한 번**(자동 핸들에서 처음 바꾸는 것은 자유), 옛 핸들은 **90일 잠금** + **30일 동안 새 주소로 이동** (`member_handle_history`)
+- **공개는 본인이 켤 때만** (기본 비공개). 공개 조건 = 만 14세 이상 동의(`consent.age_14_plus`) + 운영 숨김 아님. 검색 노출(`profile_searchable`)은 공개와 **별도 동의**, 기본 noindex
+- **공개 항목은 DB 함수 `profile_public_payload` 한 곳에서만 고른다** — 공개 화면·공유 링크·본인 미리보기·미리보기 카드가 같은 결과. 연락처는 어떤 경우에도 공개하지 않는다. 다른 브랜드 섹션은 본인이 켠 것만 (계약 4)
+- 비공개 공유 = 기한 있는 링크 (`?s=토큰`, 1·7·30일, 10개, 회수 가능, DB엔 해시만) · 방문 수 = 하루 집계만 · 신고 → 인트라 › 통합 회원 › 프로필 신고 (Action Hub) → 운영 숨김(`profile_blocked_at`, service_role만)
+- 브랜드별 공개 설정 = `member_brand_profile_settings` (P2 My Profile — 브랜드 도메인 `/@핸들`)
+- ❌ 화면에서 공개 항목을 따로 고르기 (DB 함수 우회) ❌ 핸들로 로그인·이메일 조회 ❌ 다른 브랜드 활동을 본인 동의 없이 공개 프로필에 노출
+
 ### 프로필 이미지 (아바타)
 
 - **Storage**: Supabase `avatars` 버킷 (public, 2MB, jpeg/png/webp/gif)

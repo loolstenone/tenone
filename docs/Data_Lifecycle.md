@@ -131,6 +131,12 @@
 ### 3.4 공통 핵심 (계정 전체 탈퇴 시)
 `member_roles` · `member_capability_roles` · `member_preferences` · `member_brand_joins` · `uc_*` → 삭제 (members FK cascade 여부 점검 필요) · UC는 정책상 소멸 (CLAUDE.md 1.5)
 
+**공개 프로필 (2026-10-16, `sql/profile-p1-core.sql`)** — 모두 members FK `ON DELETE CASCADE`
+- 계정 전체 탈퇴: `profile_share_links`·`profile_view_daily`·`member_brand_profile_settings`·`member_handle_history` 행 삭제. `members.handle`을 비우면 옛 핸들은 이력에 남아 **90일 동안 다른 사람이 못 쓴다** (사칭 방지) → 90일 지나면 이력 행 삭제 대상
+- 브랜드만 탈퇴: 그 브랜드의 `member_brand_profile_settings` 행 삭제 + 다른 브랜드 설정의 `include_brands`에서 그 브랜드 제거 (P2에서 구현)
+- `profile_reports`: 신고자·대상이 탈퇴하면 cascade 삭제. 처리 기록이 분쟁 대응에 필요해지면 익명화 보관으로 바꾼다
+- 방문 수는 하루 집계 숫자만 — 개인 식별 정보 없음
+
 ---
 
 ## 4. 전 브랜드 공통 정책 (2026-10-05 결정)

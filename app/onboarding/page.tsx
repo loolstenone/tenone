@@ -138,7 +138,7 @@ export default function OnboardingPage() {
                         <li>• 핸들(ID) + 비밀번호</li>
                     </ul>
                     <p className="mt-3 text-amber-700 font-medium border-t border-amber-200 pt-3">
-                        🔒 Google·Kakao 계정을 삭제해도 이메일 또는 핸들로 언제든지 로그인할 수 있습니다.
+                        🔒 Google·Kakao 계정을 삭제해도 이메일로 언제든지 로그인할 수 있습니다.
                     </p>
                 </div>
 

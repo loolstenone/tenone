@@ -52,16 +52,3 @@ export function OneIdHelp({ size = 14 }: { size?: number }) {
         </HelpPopover>
     );
 }
-
-/** 핸들 ID 안내 — 로그인 모달의 핸들 탭 옆 */
-export function HandleIdHelp({ size = 14 }: { size?: number }) {
-    return (
-        <HelpPopover title="핸들 ID" label="핸들 ID 안내" size={size} align="end">
-            One ID에 붙이는 나만의 아이디예요 (예: <b className="font-semibold text-neutral-800">@tenone</b>).
-            이메일 대신 핸들과 비밀번호로 로그인할 수 있고, 공개 프로필 주소로도 쓰입니다.
-            <span className="mt-2 block text-[11px] text-neutral-500">
-                핸들은 로그인 후 내 프로필에서 정할 수 있어요. 아직 만들지 않았다면 이메일로 로그인하세요.
-            </span>
-        </HelpPopover>
-    );
-}

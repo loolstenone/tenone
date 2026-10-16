@@ -159,6 +159,16 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
         category: "privacy",
         priority: "critical",
     },
+    {
+        key: "profile_reports",
+        label: "프로필 신고",
+        table: "profile_reports",
+        filter: { column: "status", value: "pending" },
+        href: "/intra/ums/members/profile-reports",
+        brand_id: "global",
+        category: "moderation",
+        priority: "high",
+    },
 
     // ── CS · 문의
     {

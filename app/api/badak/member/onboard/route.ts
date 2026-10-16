@@ -68,14 +68,18 @@ export async function PATCH(request: NextRequest) {
     onboarding_completed: true,
     updated_at: new Date().toISOString(),
   };
-  if (handle?.trim()) {
-    const cleanHandle = handle.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
-    if (cleanHandle.length >= 3) membersUpdate.handle = cleanHandle;
-  }
   await supabase
     .from('members')
     .update(membersUpdate)
     .eq('auth_id', user.id);
+
+  // 핸들은 따로 — 사용 중·예약어(DB 트리거)면 핸들만 안 바뀌고 나머지 온보딩은 저장된다
+  if (handle?.trim()) {
+    const cleanHandle = handle.trim().toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20);
+    if (cleanHandle.length >= 3) {
+      await supabase.from('members').update({ handle: cleanHandle }).eq('auth_id', user.id);
+    }
+  }
 
   // 온보딩 완료 = 정식 바닥 멤버 → members.affiliations 동기화
   await addBadakAffiliation(supabase, user.id);

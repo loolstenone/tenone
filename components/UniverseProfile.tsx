@@ -10,6 +10,8 @@ import { getCapabilityAggregation, type CapabilityAggregation } from '@/lib/supa
 import { getAllSiteConfigs, type SiteConfigRow } from '@/lib/supabase/site-configs';
 import { createClient } from '@/lib/supabase/client';
 import { ServiceLinksPanel } from '@/components/ServiceLinksPanel';
+import { ProfilePublishPanel } from '@/components/profile/ProfilePublishPanel';
+import { toPublicProfileData, friendlyDbError, type PublicProfileRow } from '@/lib/profile/public-profile';
 import { JOB_FUNCTIONS, INDUSTRIES } from '@/lib/badak-constants';
 import type { TaxonomyKind } from '@/lib/supabase/taxonomies';
 import Image from 'next/image';
@@ -309,7 +311,8 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
     /* ── 표시용 프로필 (소유자=user, 공개=publicData) ── */
     const DEFAULT_PRIVACY: Record<string, boolean> = {
         email: false, phone: false, company: true, bio: true,
-        hero: true, badak: true, madleague: true, madleap: true, youinone: true,
+        // 다른 브랜드 활동은 본인이 켤 때만 공개 (계약 4 — 브랜드 간 노출 별도 동의)
+        hero: false, badak: false, madleague: false, madleap: false, youinone: false,
     };
 
     const profile = isOwner ? (user ? {
@@ -361,6 +364,8 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
 
     /* ── 공개 범위 토글 ── */
     const [visibilityUpdating, setVisibilityUpdating] = useState(false);
+    const [ownerNotice, setOwnerNotice] = useState('');   // DB가 거절한 이유 (만 14세 확인·핸들 규칙 등)
+    const [previewData, setPreviewData] = useState<PublicProfileData | null>(null);
 
     /* ── 공유 복사 ── */
     const [copied, setCopied] = useState(false);
@@ -465,8 +470,8 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
             setHandleError('');
             return;
         }
-        if (!/^[a-z0-9_.-]{3,30}$/.test(handle)) {
-            setHandleError('3~30자, 영문 소문자·숫자·_·.·- 만 허용');
+        if (!/^[a-z0-9_]{3,20}$/.test(handle)) {   // DB 제약 members_handle_format과 같게
+            setHandleError('3~20자, 영문 소문자·숫자·_ 만 사용할 수 있습니다');
             setHandleAvailable(false);
             return;
         }
@@ -527,12 +532,23 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
         if (!user || !profile) return;
         const next = profile.profileVisibility === 'public' ? 'private' : 'public';
         setVisibilityUpdating(true);
+        setOwnerNotice('');
         try {
             const supabase = createClient();
-            await supabase.from('members').update({ profile_visibility: next }).eq('id', user.id);
+            const { error } = await supabase.from('members').update({ profile_visibility: next }).eq('id', user.id);
+            if (error) { setOwnerNotice(friendlyDbError(error, '공개 설정을 바꾸지 못했습니다.')); return; }
             updateProfile({ profileVisibility: next });
-        } catch { /* silent */ }
+        } catch { setOwnerNotice('공개 설정을 바꾸지 못했습니다.'); }
         finally { setVisibilityUpdating(false); }
+    }
+
+    /* ── 미리보기: 서버가 실제로 내보내는 값 그대로 (저장된 상태 기준) ── */
+    async function openPreview() {
+        setOwnerNotice('');
+        const { data, error } = await createClient().rpc('preview_my_public_profile');
+        if (error || !data) { setOwnerNotice('미리보기를 불러오지 못했습니다.'); return; }
+        setPreviewData(toPublicProfileData(data as PublicProfileRow));
+        setPreviewOpen(true);
     }
 
     /* ── 공유 URL 복사 ── */
@@ -593,7 +609,12 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
             social_links: editForm.socialLinks,
         };
         if (editForm.handle.trim()) updates.handle = editForm.handle.trim();
-        await supabase.from('members').update(updates).eq('id', user!.id);
+        const { error } = await supabase.from('members').update(updates).eq('id', user!.id);
+        if (error) {
+            // 핸들 규칙(예약어·7일·90일 잠금)이나 중복이면 전체 저장이 거절된다 — 이유를 보여 주고 편집 상태 유지
+            setHandleError(friendlyDbError(error, '저장하지 못했습니다. 잠시 후 다시 시도해 주세요.'));
+            return;
+        }
         updateProfile({
             name: editForm.name,
             phone: editForm.phone,
@@ -639,7 +660,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
         if (INTERNAL_ONLY.has(s.id) && !isStaff) return false;
         if (isOwner && siteConfigsLoaded && !openSiteIds.has(s.id) && !isStaff) return false;
         if (!isOwner && (!siteConfigsLoaded || !openSiteIds.has(s.id))) return false;
-        if (!isOwner && profile?.privacySettings?.[s.id] === false) return false;
+        if (!isOwner && profile?.privacySettings?.[s.id] !== true) return false;
         return true;
     });
 
@@ -671,33 +692,11 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
 
     const isPublic = profile.profileVisibility !== 'private';
 
-    /* ── 미리보기용 publicData 구성 ── */
-    const previewPublicData: PublicProfileData | null = isOwner && user ? {
-        id: user.id,
-        name: user.name,
-        handle: user.handle || '',
-        email: user.email,
-        company: user.company || undefined,
-        bio: user.bio || undefined,
-        avatarUrl: user.avatarUrl || undefined,
-        affiliations: user.affiliations || [],
-        interestsIndustry: user.interestsIndustry || [],
-        interestsJob: user.interestsJob || [],
-        profileVisibility: (user.profileVisibility as 'public' | 'private') || 'public',
-        role: user.role || 'Member',
-        createdAt: user.createdAt || '',
-        privacySettings: (editing
-            ? editForm.privacySettings
-            : user.privacySettings) as Record<string, boolean> | undefined,
-        socialLinks: (editing
-            ? editForm.socialLinks
-            : user.socialLinks) as Record<string, string> | undefined,
-    } : null;
 
     return (
         <>
         {/* ── 미리보기 모달 ── */}
-        {previewOpen && previewPublicData && (
+        {previewOpen && previewData && (
             <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm overflow-y-auto py-8 px-4"
                 onClick={e => { if (e.target === e.currentTarget) setPreviewOpen(false); }}>
                 <div className="w-full max-w-2xl">
@@ -710,11 +709,14 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                             <X className="h-5 w-5" />
                         </button>
                     </div>
-                    <UniverseProfile isOwner={false} publicData={previewPublicData} />
+                    <UniverseProfile isOwner={false} publicData={previewData} />
                 </div>
             </div>
         )}
         <div className="space-y-5">
+            {isOwner && ownerNotice && (
+                <p role="alert" className="text-xs text-red-600 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl px-4 py-3">{ownerNotice}</p>
+            )}
 
             {/* ════════════════════════════════
                 프로필 카드 (전체 통합)
@@ -849,7 +851,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                                 {isPublic ? '공개' : '비공개'}
                             </button>
                             {/* 미리보기 */}
-                            <button onClick={() => setPreviewOpen(true)}
+                            <button onClick={openPreview}
                                 title="외부인 뷰로 미리보기"
                                 className="flex items-center gap-1 text-[11px] tn-text-sub border tn-border px-2.5 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer">
                                 <Eye className="h-3 w-3" /> 미리보기
@@ -902,7 +904,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                             <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm tn-text-sub">@</span>
                                 <input value={editForm.handle}
-                                    onChange={e => setEditForm(f => ({ ...f, handle: e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, '') }))}
+                                    onChange={e => setEditForm(f => ({ ...f, handle: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20) }))}
                                     placeholder="your-handle"
                                     className="w-full text-sm tn-text bg-transparent border tn-border rounded-lg pl-7 pr-9 py-1.5 focus:outline-none focus:ring-1 focus:ring-neutral-400" />
                                 <span className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -1030,8 +1032,8 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                         {/* 프라이버시 설정 helper */}
                         {(() => {
                             const ps = profile.privacySettings || {};
-                            const showEmail   = isOwner || ps.email   !== false;
-                            const showPhone       = isOwner || ps.phone       !== false;
+                            const showEmail   = isOwner || !!profile.email;   // 본인이 켠 경우에만 값이 온다
+                            const showPhone       = isOwner;                  // 연락처는 공개 대상 아님
                             const showCompany     = isOwner || ps.company     !== false;
                             const showBio         = isOwner || ps.bio         !== false;
                             const showSocialLinks = isOwner || ps.socialLinks !== false;
@@ -1056,7 +1058,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                                         </div>
                                     )}
                                     {(() => {
-                                        const showBadakCareer = isOwner || ps.badak !== false;
+                                        const showBadakCareer = isOwner || ps.badak === true;
                                         const careerJob = badakProfile?.fields?.['직무'] as string | null;
                                         const careerIndustry = badakProfile?.fields?.['산업군'] as string | null;
                                         const careerLevel = badakProfile?.fields?.['경력'] as string | null;
@@ -1162,7 +1164,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                 </div>{/* /px-8 py-5 */}
 
                 {/* ── HeRo 유형 ── */}
-                {heroProfile && (isOwner || (profile?.privacySettings?.hero !== false)) && (
+                {heroProfile && (isOwner || (profile?.privacySettings?.hero === true)) && (
                     <div className="px-8 py-5 border-t tn-border">
                         <h2 className="text-xs font-semibold text-neutral-700 mb-4 flex items-center gap-2">
                             <Users className="h-3.5 w-3.5 tn-text-sub" style={{ color: '#dc2626' }} /> HeRo 영웅 유형
@@ -1193,7 +1195,7 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
                 )}
 
                 {/* ── Badak 활동 ── */}
-                {badakActivity && (isOwner || (profile?.privacySettings?.badak !== false)) && (badakActivity.ledGroups.length > 0 || badakActivity.joinedGroups.length > 0) && (
+                {badakActivity && (isOwner || (profile?.privacySettings?.badak === true)) && (badakActivity.ledGroups.length > 0 || badakActivity.joinedGroups.length > 0) && (
                     <div className="px-8 py-5 border-t tn-border">
                         <h2 className="text-xs font-semibold text-neutral-700 mb-4 flex items-center gap-2">
                             <Briefcase className="h-3.5 w-3.5 tn-text-sub" style={{ color: '#f59e0b' }} /> Badak 활동
@@ -1322,6 +1324,9 @@ export function UniverseProfile({ isOwner = true, publicData, children }: Univer
             {/* ════════════════════════════════
                 유니버스 서비스 (소유자만, 아코디언)
             ════════════════════════════════ */}
+            {/* 공개·공유 관리 (본인만) */}
+            {isOwner && user && <ProfilePublishPanel />}
+
             {/* 방명록 등 슬롯 */}
             {children}
 

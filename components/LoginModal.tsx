@@ -2,12 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { X, Eye, EyeOff, AtSign, Mail } from "lucide-react";
+import { X, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { createClient } from "@/lib/supabase/client";
 import { CaptchaWidget, useCaptcha, CAPTCHA_PENDING_MESSAGE } from "@/components/CaptchaWidget";
 import { shouldTrySso, startSso, publishLoginToHub } from "@/lib/sso";
-import { OneIdHelp, HandleIdHelp } from "@/components/OneIdHelp";
+import { OneIdHelp } from "@/components/OneIdHelp";
 import { SignupConsent, EMPTY_CONSENT, CONSENT_REQUIRED_MESSAGE, isConsentValid, buildMemberConsent, type SignupConsentValue } from "@/components/SignupConsent";
 
 interface LoginModalProps {
@@ -23,8 +22,6 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
     const [tab, setTab] = useState<"login" | "signup">(defaultTab);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
-    const [handle, setHandle] = useState("");
-    const [loginMode, setLoginMode] = useState<"email" | "handle">("email");
     const [password, setPassword] = useState("");
     const [passwordConfirm, setPasswordConfirm] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -60,7 +57,7 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
         return () => { document.body.style.overflow = ""; };
     }, [isOpen]);
 
-    const resetForm = () => { setName(""); setEmail(""); setHandle(""); setPassword(""); setPasswordConfirm(""); setError(""); setIsDuplicate(false); setShowPassword(false); setLoginMode("email"); };
+    const resetForm = () => { setName(""); setEmail(""); setPassword(""); setPasswordConfirm(""); setError(""); setIsDuplicate(false); setShowPassword(false); };
     const switchTab = (t: "login" | "signup") => { resetForm(); setTab(t); };
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -69,25 +66,6 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
         if (!captcha.ready) { setError(CAPTCHA_PENDING_MESSAGE); return; }
         setIsSubmitting(true);
         try {
-            // 핸들 로그인: 서버가 핸들→이메일 확인과 로그인을 함께 처리, 이메일은 브라우저로 오지 않는다.
-            // 받은 세션을 setSession → onAuthStateChange(SIGNED_IN)가 회원 동기화 → 모달 자동 닫힘
-            if (loginMode === "handle") {
-                const res = await fetch("/api/auth/handle-login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ handle, password, captchaToken: captcha.token }),
-                });
-                captcha.reset();
-                const body = await res.json().catch(() => ({})) as { error?: string; session?: { access_token: string; refresh_token: string } };
-                const { error: sessErr } = res.ok && body.session
-                    ? await createClient().auth.setSession(body.session)
-                    : { error: new Error(body.error || "핸들 또는 비밀번호가 올바르지 않습니다.") };
-                if (sessErr) { setError(body.error || "핸들 또는 비밀번호가 올바르지 않습니다."); setFailCount(n => n + 1); }
-                else publishLoginToHub();
-                setIsSubmitting(false);
-                return;
-            }
-
             const result = await login(email, password, captcha.token);
             captcha.reset();
             if (!result.success) { setError(result.error || "이메일 또는 비밀번호가 올바르지 않습니다."); setFailCount(n => n + 1); }
@@ -192,31 +170,8 @@ export function LoginModal({ isOpen, onClose, accentColor = "#171717", defaultTa
                     {/* 로그인 폼 */}
                     {tab === "login" && (
                         <form onSubmit={handleLogin} className="space-y-3">
-                            {/* 이메일 / 핸들 전환 탭 + 핸들 ID 안내 (토글이 overflow-hidden이라 안내 버튼은 바깥) */}
-                            <div className="flex items-center gap-2">
-                            <div className="flex flex-1 rounded-xl overflow-hidden border border-neutral-200 text-xs font-medium">
-                                <button type="button"
-                                    onClick={() => { setLoginMode("email"); setError(""); }}
-                                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 transition-colors ${loginMode === "email" ? "bg-neutral-900 text-white" : "bg-white text-neutral-500 hover:bg-neutral-50"}`}>
-                                    <Mail className="w-3.5 h-3.5" /> 이메일
-                                </button>
-                                <button type="button"
-                                    onClick={() => { setLoginMode("handle"); setError(""); }}
-                                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 transition-colors ${loginMode === "handle" ? "bg-neutral-900 text-white" : "bg-white text-neutral-500 hover:bg-neutral-50"}`}>
-                                    <AtSign className="w-3.5 h-3.5" /> 핸들 ID
-                                </button>
-                            </div>
-                            <HandleIdHelp />
-                            </div>
-
-                            {loginMode === "email" ? (
-                                <input type="email" placeholder="email@example.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} required />
-                            ) : (
-                                <div className="relative">
-                                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 text-sm font-medium">@</span>
-                                    <input type="text" placeholder="myhandle" value={handle} onChange={e => setHandle(e.target.value.replace(/^@/, "").toLowerCase())} className={inputClass + " pl-7"} required />
-                                </div>
-                            )}
+                            {/* 로그인 ID = 이메일. 핸들은 공개 주소라 로그인 ID로 쓰지 않는다 (2026-10-16 보안 점검) */}
+                            <input type="email" placeholder="email@example.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} required />
                             <div className="relative">
                                 <input type={showPassword ? "text" : "password"} placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)} className={inputClass + " pr-10"} required />
                                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600">
