@@ -1531,10 +1531,11 @@ npm run site:check -- --all --live      # 공식 주소 있는 전 브랜드
 
 ## 3.3 관리 파일 읽는 순서 (작업 시작 시)
 
-1. `WORK_STATUS.md` — 어제 멈춘 지점 파악
-2. `CHANGELOG.md` — 최근 변경 맥락
-3. `ROADMAP.md` — 전체 방향성
-4. (해당 브랜드 작업이면) `app/(BrandName)/CLAUDE.md` — 브랜드 컨텍스트
+1. **모바일 수신함** [GitHub Issue #2](https://github.com/loolstenone/tenone/issues/2) — `✅ 처리` 답글이 없는 댓글 (§3.5)
+2. `WORK_STATUS.md` — 어제 멈춘 지점 파악
+3. `CHANGELOG.md` — 최근 변경 맥락
+4. `ROADMAP.md` — 전체 방향성
+5. (해당 브랜드 작업이면) `app/(BrandName)/CLAUDE.md` — 브랜드 컨텍스트
 
 ## 3.4 단일 master 운영 원칙
 
@@ -1559,6 +1560,28 @@ git pull origin master  →  파일 편집  →  commit  →  master에 push
 
 위 케이스가 아니면 master 단일.
 
+## 3.5 스마트폰 모니터링 모드 — 모바일 수신함 (2026-10-17)
+
+> 스마트폰(클라우드 Claude 세션)에서 내린 결정·지시·DB 변경을 PC(사무실·집)로 넘기는 경로 = **[GitHub Issue #2 모바일 결정함](https://github.com/loolstenone/tenone/issues/2)** (닫지 않는 상시 수신함).
+
+| 구분 | 스마트폰 세션 | PC 세션 |
+|---|---|---|
+| 역할 | **보기·분석·결정** — 현황 점검, 판단, 지시 | 반영 — 코드·문서·배포 |
+| 코드 수정·push | 하지 않는다 (꼭 필요하면 명시 승인 후 master push 1회 + 수신함에 기록) | 평소대로 (§4.3) |
+| DB 변경 | **명시 승인 시에만**, 했으면 반드시 `[DB 변경]` 댓글 — DB는 하나라 두 PC·실서버에 즉시 반영된다 | 평소대로 (부록 D) |
+| 수신함 | 결정이 나오면 댓글 1개 = 항목 1개 | 작업 시작 3단계에서 미처리 댓글부터 읽고, 반영한 항목엔 `✅ 처리 (커밋 해시)` 답글 |
+
+**댓글 양식**
+```
+[결정|지시|DB 변경|메모] 제목
+- 내용:
+- 이유:
+- PC에서 할 일:
+```
+
+- ⚠️ **공개 저장소** — 개인정보·키·보안 취약점 상세·내부 금액은 쓰지 않는다. 그런 내용은 "PC에서 WORK_STATUS 참고"처럼 위치만 적는다
+- ❌ 수신함 항목을 반영하지 않고 `✅ 처리` 답글 · 수신함 이슈 닫기
+
 ---
 
 # 4. 작업 프로토콜
@@ -1572,7 +1595,7 @@ git pull origin master  →  파일 편집  →  commit  →  master에 push
 ```
 1. git checkout master          ← 항상 master에서 작업
 2. git pull origin master       ← ⛔ 절대 생략 금지. 생략하면 충돌·중복 작업
-3. 상황 파악                     ← WORK_STATUS.md → CHANGELOG.md → ROADMAP.md
+3. 상황 파악                     ← 모바일 수신함 Issue #2 미처리 댓글 → WORK_STATUS.md → CHANGELOG.md → ROADMAP.md
 4. 개발 서버 실행 (필요 시)      ← 실제 화면을 눈으로 확인 (코드만 보고 판단 금지)
 5. 브리핑 보고                   ← 아래 양식으로 사용자에게 보고
    → 사용자 확인 후 작업 시작
