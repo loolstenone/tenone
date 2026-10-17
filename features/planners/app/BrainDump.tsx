@@ -5,6 +5,7 @@ import { Loader2, Sparkles, Check, X, Camera } from "lucide-react";
 import { VoiceRecordButton } from "@/features/myverse/planner/VoiceRecordButton";
 import { commitParsedActions, describeAction, sanitizeActions, saveMemoNote, shrinkImage, todayKst, READ_IMAGE_EVENT, type ParsedAction } from "@/features/myverse/planner/ai-actions";
 import { AI_BETA_ONLY_TEXT } from "@/lib/myverse/ai-error";
+import { PAD_FROM, PAD_FROM_STORAGE, isPadFromKey } from "@/lib/planners/pad-landing";
 
 // 생각 쏟아내기 — 플래너'스 AI 1단계 (2026-10-14)
 // "기록은 아날로그처럼 자유롭게" → 생각나는 대로 적거나 말하면 AI가 할 일·일정으로 나누고, 사람이 확인한 뒤 넣는다
@@ -43,6 +44,15 @@ export function BrainDump({ date }: { date?: string }) {
             url.searchParams.delete("compose");
             window.history.replaceState(null, "", url.pathname + url.search);
         }
+        // PAD(PDF) 페이지에서 왔으면 그 페이지에 맞는 글을 미리 채운다 (/planners/ai/from/{key}, lib/planners/pad-landing.ts)
+        try {
+            const from = sessionStorage.getItem(PAD_FROM_STORAGE);
+            if (from) {
+                sessionStorage.removeItem(PAD_FROM_STORAGE);
+                const preset = isPadFromKey(from) ? PAD_FROM[from] : null;
+                if (preset?.prompt) { setText((t) => t || preset.prompt); focus(); }
+            }
+        } catch { /* 저장소를 못 쓰면 빈 칸 그대로 */ }
         window.addEventListener(COMPOSE_EVENT, focus);
         return () => window.removeEventListener(COMPOSE_EVENT, focus);
     }, []);

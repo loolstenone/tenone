@@ -28,7 +28,6 @@ export const metadata: Metadata = {
     template: "%s | Ten:One™",
   },
   description: "Ten:One™ Universe는 기업과 사회의 문제를 해결하는 다양한 프로젝트를 기획·운영하는 멀티 브랜드 생태계입니다. LUKI, MAD League, RooK, Badak 등 19개 브랜드를 운영합니다.",
-  keywords: ["Ten:One", "텐원", "멀티브랜드", "마케팅", "광고", "AI", "크리에이티브", "MAD League", "LUKI", "RooK", "Badak"],
   authors: [{ name: "Cheonil Jeon", url: "https://tenone.biz" }],
   creator: "Ten:One™",
   openGraph: {
@@ -40,9 +39,8 @@ export const metadata: Metadata = {
     description: "가치로 연결된 거대한 세계관을 만들기로 했다. 기업과 사회의 문제를 해결하는 다양한 프로젝트.",
   },
   twitter: {
+    // 제목·설명은 넣지 않는다 - 브랜드 사이트마다 og:title·og:description을 X가 그대로 쓴다 (2026-10-18, 전 브랜드에 TenOne 제목이 나가던 문제)
     card: "summary_large_image",
-    title: "Ten:One™ - Value Connector",
-    description: "가치로 연결된 거대한 세계관을 만들기로 했다.",
   },
   robots: {
     index: true,

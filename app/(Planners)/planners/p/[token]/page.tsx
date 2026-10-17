@@ -26,7 +26,7 @@ export async function generateMetadata(
     return {
         title,
         description,
-        openGraph: { title, description, siteName: "Ten:One™ Universe", type: "website" },
+        openGraph: { title, description, siteName: "Planner's", type: "website" },
         robots: { index: false, follow: false },
     };
 }

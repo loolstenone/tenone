@@ -36,6 +36,10 @@ const nextConfig: NextConfig = {
         permanent: false,
       },
       { source: '/myverse/app/personal', destination: '/planners/app/personal', permanent: false },
+      // 옛 구글 사이트(planners.tenone.biz/planners-planner/…) 주소 - PAD PDF 도움말 링크가 아직 가리킨다 (2026-10-18)
+      // P.I 도움말 → PAD 들어오는 길(P.I), 그 밖의 옛 페이지 → 플래너를 다시 만들다(About)
+      { source: '/planners-planner/%ED%8D%BC%EC%8A%A4%EB%84%90-%EC%95%84%EC%9D%B4%EB%8D%B4%ED%8B%B0%ED%8B%B0', destination: '/planners/ai/from/pi', permanent: true }, // 퍼스널-아이덴티티 (주소는 인코딩된 그대로 비교)
+      { source: '/planners-planner/:path*', destination: '/planners/about', permanent: true },
       // 삭제된 페이지 — 301 리다이렉트
       { source: '/goods', destination: '/', permanent: true },
       { source: '/goods/:path*', destination: '/', permanent: true },

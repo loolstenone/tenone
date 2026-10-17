@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         // openGraph는 레이아웃 값을 통째로 덮어쓴다 — 사이트 이름·형식까지 같이 적는다 (2026-10-15)
         openGraph: {
             title: file.title,
-            siteName: "Ten:One™ Universe",
+            siteName: "Planner's",
             type: "website",
             ...(file.thumbnail_url && { images: [file.thumbnail_url] }),
         },

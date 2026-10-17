@@ -8,6 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { default: db?.meta_title ?? site.meta.title, template: `%s | ${db?.name ?? site.name}` },
     description: db?.meta_description ?? site.meta.description,
+    keywords: site.meta.keywords,
     manifest: '/dokdae-manifest.json',
     appleWebApp: {
       capable: true,
@@ -22,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: db?.meta_title ?? site.meta.title,
       description: db?.meta_description ?? site.meta.description,
-      siteName: 'Ten:One™ Universe',
+      siteName: db?.name ?? site.name,
       type: 'website',
       ...((db?.meta_og_image ?? site.meta.ogImage) && { images: [db?.meta_og_image ?? site.meta.ogImage!] }),
     },

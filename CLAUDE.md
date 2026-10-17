@@ -321,11 +321,12 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
         title: { default: db?.meta_title ?? site.meta.title, template: `%s | ${db?.name ?? site.name}` },
         description: db?.meta_description ?? site.meta.description,
+        keywords: site.meta.keywords,
         icons: { icon: db?.favicon_url ?? site.faviconUrl, apple: db?.apple_touch_icon ?? site.appleTouchIcon },
         openGraph: {
             title: db?.meta_title ?? site.meta.title,
             description: db?.meta_description ?? site.meta.description,
-            siteName: 'Ten:One™ Universe',
+            siteName: db?.name ?? site.name,   // 브랜드 이름 (2026-10-18 사용자 결정 - 원칙 7, 공유 미리보기에 유니버스를 내세우지 않는다)
             type: 'website',
             ...((db?.meta_og_image ?? site.meta.ogImage) && { images: [db?.meta_og_image ?? site.meta.ogImage!] }),
         },
@@ -342,6 +343,7 @@ export async function generateMetadata(): Promise<Metadata> {
 - ❌ 레이아웃에 `export const metadata` (정적) 사용 → 반드시 `generateMetadata()`
 - ❌ 하드코딩 fallback 문자열 → `site.meta.title` 사용
 - ❌ openGraph에서 ogImage 누락 → 반드시 조건부 images spread 포함
+- ❌ 루트 레이아웃에 twitter 제목·설명·keywords 두기 - 모든 브랜드가 물려받아 TenOne 제목이 나간다 (2026-10-18). X는 각 브랜드 og:title·og:description을 쓴다
 - ❌ 페이지에 "준비 중", "Coming Soon", "공사중" 텍스트 직접 표시
 - ❌ 사이트 차단을 페이지 컴포넌트에서 처리 → `SiteClosedOverlay`가 전담
 
