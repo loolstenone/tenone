@@ -133,7 +133,7 @@ const faqItems: FaqItem[] = [
             "",
             "총 약 4시간이며, 온보딩 첫 달 내에 완료해야 합니다.",
         ],
-        link: { text: "온보딩 가이드", href: "/onboarding" },
+        link: { text: "온보딩 가이드", href: "/wiki/onboarding" },
     },
 
     // ── 업무 가이드 (기존 guides 페이지에서 통합) ──

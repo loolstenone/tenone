@@ -43,6 +43,14 @@ const nextConfig: NextConfig = {
       // 삭제된 페이지 — 301 리다이렉트
       { source: '/goods', destination: '/', permanent: true },
       { source: '/goods/:path*', destination: '/', permanent: true },
+      // 쓰지 않던 TenOne 옛 화면 삭제 (2026-10-18) - 지원 폼(저장 안 됨)·초대 코드 가입·옛 첫 설정. tenone.biz에서만 홈으로
+      // (브랜드 도메인은 middleware가 /{brand}/apply 등으로 rewrite하므로 host로 한정 - madleague.net/apply를 막지 않게)
+      ...['/apply', '/invite', '/onboarding'].map(source => ({
+        source,
+        has: [{ type: 'host' as const, value: '(www\\.)?tenone\\.biz|localhost' }],
+        destination: '/',
+        permanent: true,
+      })),
       // 뉴스룸 폐지 (2026-10-05)
       { source: '/newsroom', destination: '/', permanent: true },
       { source: '/newsroom/:path*', destination: '/', permanent: true },
