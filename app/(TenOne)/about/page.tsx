@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { historyEvents } from "@/lib/data";
 import { UNIVERSE_ROLE_GROUPS } from "@/lib/universe-map";
+import { useOpenLinkFilter } from "@/lib/use-open-sites";
 
 const TOTAL_BRAND_COUNT = UNIVERSE_ROLE_GROUPS.reduce((sum, g) => sum + g.brands.length, 0);
 
@@ -33,6 +34,7 @@ const flywheel = [
 ];
 
 function AboutContent() {
+    const isOpenLink = useOpenLinkFilter();
     const searchParams = useSearchParams();
     const router = useRouter();
     const tabParam = searchParams.get('tab');
@@ -285,7 +287,7 @@ function AboutContent() {
                                                         </div>
                                                     </div>
                                                 );
-                                                return brand.href ? (
+                                                return brand.href && isOpenLink(brand.href) ? (
                                                     <Link key={brand.name} href={brand.href}>{inner}</Link>
                                                 ) : (
                                                     <div key={brand.name}>{inner}</div>

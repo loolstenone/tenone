@@ -26,6 +26,7 @@ import Link from "next/link";
 import { CrossSiteLink } from "@/components/CrossSiteLink";
 import { COMPANY_INFO } from "@/lib/company-info";
 import { siteHeaderNav } from "@/lib/brand-site-menus";
+import { useOpenLinkFilter } from "@/lib/use-open-sites";
 import { ReactNode } from "react";
 import clsx from "clsx";
 
@@ -77,15 +78,17 @@ export function UniverseFooter({
     children,
 }: UniverseFooterProps) {
     const year = new Date().getFullYear();
+    const isOpenLink = useOpenLinkFilter();
     const menu = siteId ? menuFromRegistry(siteId) : [];
     const standard = siteId || actions.length > 0 || channels.length > 0;
+    // 다른 브랜드로 가는 링크(채널·기존 링크 열)는 열린 사이트만 (ums_sites.is_open, lib/use-open-sites.ts)
     const columns: FooterColumn[] = (standard
         ? [
             { title: "메뉴", links: menu },
             { title: "참여", links: actions },
-            { title: "채널", links: channels },
+            { title: "채널", links: channels.filter(l => isOpenLink(l.href)) },
         ]
-        : linkColumns
+        : linkColumns.map(c => ({ ...c, links: c.links.filter(l => isOpenLink(l.href)) }))
     ).filter(c => c.links.length > 0); // 빈 열은 숨긴다
 
     const textPrimary = dark ? "text-white" : "text-neutral-900";

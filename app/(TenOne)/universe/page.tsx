@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Users, TrendingUp, GraduationCap, ExternalLink, Zap, Globe, Layers, Sparkles, Building2, Briefcase } from "lucide-react";
 import { siteConfigs } from "@/lib/site-config";
+import { useOpenLinkFilter } from "@/lib/use-open-sites";
 
 const BRAND_COUNT = Object.keys(siteConfigs).length;
 const ROLE_GROUP_COUNT = 8;
@@ -87,6 +88,13 @@ const synergyChains = [
     ]},
 ];
 
+/** 열린 사이트면 링크, 아직 안 연 사이트면 그냥 카드 (ums_sites.is_open) */
+function MaybeLink({ href, open, className, style, children }: { href: string; open: boolean; className: string; style: React.CSSProperties; children: React.ReactNode }) {
+    return open
+        ? <Link href={href} className={className} style={style}>{children}</Link>
+        : <div className={className} style={style}>{children}</div>;
+}
+
 const stats = [
     { value: String(BRAND_COUNT), label: "브랜드", desc: "독립적으로 운영되는 사업" },
     { value: String(ROLE_GROUP_COUNT), label: "역할 그룹", desc: "기능별 분류" },
@@ -97,6 +105,7 @@ const stats = [
 export default function UniversePage() {
     const [selected, setSelected] = useState<string | null>(null);
     const selectedBiz = businesses.find(b => b.id === selected);
+    const isOpenLink = useOpenLinkFilter();
 
     return (
         <div className="min-h-screen" style={{ backgroundColor: "var(--tn-bg)", color: "var(--tn-text)" }}>
@@ -163,20 +172,20 @@ export default function UniversePage() {
 
                 {/* Two OS */}
                 <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16">
-                    <Link href="/wio" className="group p-6 border transition-all hover:border-indigo-500/60 text-center hover:-translate-y-0.5"
+                    <MaybeLink href="/wio" open={isOpenLink("/wio")} className="group p-6 border transition-all hover:border-indigo-500/60 text-center hover:-translate-y-0.5"
                         style={{ borderColor: "var(--tn-border)", backgroundColor: "transparent" }}>
                         <Sparkles className="w-4 h-4 mx-auto mb-2 text-indigo-400 opacity-60" />
                         <h3 className="text-lg font-light tracking-wide text-indigo-400">WIO</h3>
                         <p className="text-[11px] mt-1" style={{ color: "var(--tn-text-sub)" }}>IT 솔루션 인프라</p>
                         <p className="text-[10px] mt-1 opacity-40">Project &middot; CRM &middot; Content &middot; AI</p>
-                    </Link>
-                    <Link href="/youinone" className="group p-6 border transition-all hover:border-emerald-500/60 text-center hover:-translate-y-0.5"
+                    </MaybeLink>
+                    <MaybeLink href="/youinone" open={isOpenLink("/youinone")} className="group p-6 border transition-all hover:border-emerald-500/60 text-center hover:-translate-y-0.5"
                         style={{ borderColor: "var(--tn-border)", backgroundColor: "transparent" }}>
                         <Users className="w-4 h-4 mx-auto mb-2 text-emerald-400 opacity-60" />
                         <h3 className="text-lg font-light tracking-wide text-emerald-400">YouInOne</h3>
                         <p className="text-[11px] mt-1" style={{ color: "var(--tn-text-sub)" }}>인간 솔루션 인프라</p>
                         <p className="text-[10px] mt-1 opacity-40">팀 구성 &middot; 역할 &middot; 협업 &middot; 성과</p>
-                    </Link>
+                    </MaybeLink>
                 </section>
 
                 {/* Business Portfolio */}
@@ -218,7 +227,7 @@ export default function UniversePage() {
                                     <h4 className="text-sm font-light tracking-wide">{selectedBiz.name}</h4>
                                     <p className="text-[10px] mt-0.5" style={{ color: "var(--tn-text-sub)" }}>{selectedBiz.role}</p>
                                 </div>
-                                {selectedBiz.href !== "#" && (
+                                {selectedBiz.href !== "#" && isOpenLink(selectedBiz.href) && (
                                     <Link href={selectedBiz.href} className="text-[10px] flex items-center gap-1 opacity-50 hover:opacity-100 transition px-3 py-1.5 border" style={{ borderColor: "var(--tn-border)" }}>
                                         사이트 방문 <ExternalLink className="w-3 h-3" />
                                     </Link>
@@ -286,12 +295,14 @@ export default function UniversePage() {
                         <Globe className="w-4 h-4" />
                         전체 브랜드 보기
                     </Link>
+                    {isOpenLink("/wio") && (
                     <Link href="/wio/app"
                         className="inline-flex items-center gap-2 px-8 py-3 text-sm tracking-wide border transition-all hover:border-indigo-500/60"
                         style={{ borderColor: "var(--tn-border)", color: "var(--tn-text)" }}>
                         <Sparkles className="w-4 h-4" />
                         WIO 체험하기
                     </Link>
+                    )}
                 </section>
             </div>
         </div>

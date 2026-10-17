@@ -137,7 +137,7 @@ docs/              # 설계 문서
 
 ### 브랜드 Tier (2026-10-04 스냅샷)
 
-> **오픈 순서 (2026-10-17 사용자)**: 유니버스는 **하나씩 연다** - ① Planner's(베타) → ② MADLeague → 그 뒤 하나씩. 사용자에게 세계관을 말하지 않고, 쓰다 보니 넓은 세계였음을 알게 한다 (원칙 7). **차례가 오기 전 사이트는 `ums_sites.is_open=false`**(가림막·검색 차단, 직원은 그대로 봄) - 2026-10-17 HeRo·MADLeague·Badak(스테이징) 닫음. 열린 곳: TenOne · Planner's · RooK(기존 운영)
+> **오픈 순서 (2026-10-17 사용자)**: 유니버스는 **하나씩 연다** - ① Planner's(베타) → ② MADLeague → 그 뒤 하나씩. 사용자에게 세계관을 말하지 않고, 쓰다 보니 넓은 세계였음을 알게 한다 (원칙 7). **차례가 오기 전 사이트는 `ums_sites.is_open=false`**(가림막·검색 차단, 직원은 그대로 봄) - 2026-10-17 HeRo·MADLeague·Badak(스테이징) 닫음. 열린 곳: TenOne · Planner's · RooK(기존 운영) · **링크도 열린 곳으로만** - 다른 브랜드로 가는 링크(푸터 채널·TenOne 소개·브랜드 화면)는 `useOpenLinkFilter()`(`lib/use-open-sites.ts`)를 거쳐 닫힌 사이트면 숨긴다. 사이트를 열면 링크도 저절로 나타난다
 
 > ⚠️ **서비스 체계(브랜드 구성·Tier·통합/분리)는 계속 바뀐다.** 원칙·데이터 계약은 특정 브랜드에 묶이지 않게 쓰고,
 > 현재 상태의 SSOT는 **DB `ums_sites`(tier·lifecycle·hosting)** + **`lib/domain-registry.ts` CANONICAL_HOSTS** 두 곳이다. 아래 표는 참고용 스냅샷.
@@ -1241,6 +1241,7 @@ import { UniverseFooter } from "@/components/UniverseFooter";
 
 ### 절대 하지 말 것
 
+- ❌ 다른 브랜드 링크를 `useOpenLinkFilter()` 없이 그리기 (UniverseFooter 채널·기존 링크 열은 자동) - 아직 안 연 사이트로 길이 난다
 - ❌ 자체 푸터 컴포넌트 직접 작성
 - ❌ 2열 메뉴를 손으로 적기 (레지스트리 등록 브랜드는 `siteId`)
 - ❌ 브랜드 푸터에 TenOne 페이지 링크(About·Brands 등)를 브랜드 메뉴처럼 넣기

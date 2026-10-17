@@ -5,6 +5,7 @@ import Link from "next/link";
 import { brands as staticBrands } from "@/lib/data";
 import { fetchPortalBrands } from "@/lib/supabase/tenone";
 import { Brand } from "@/types/brand";
+import { useOpenLinkFilter } from "@/lib/use-open-sites";
 import { ExternalLink, ArrowRight } from "lucide-react";
 
 const categories = ['All', 'Corporate', 'Platform', 'Marketing', 'Consulting', 'Education', 'Community', 'Project Group', 'Network', 'Content', 'AI Idol', 'AI Creator', 'Fashion', 'Character', 'Startup', 'Wellness'];
@@ -18,6 +19,7 @@ const statusColor: Record<string, string> = {
 export default function BrandsPage() {
     const [brands, setBrands] = useState<Brand[]>(staticBrands);
     const [category, setCategory] = useState('All');
+    const isOpenLink = useOpenLinkFilter();
     const filtered = category === 'All' ? brands : brands.filter(b => b.category === category);
 
     useEffect(() => {
@@ -77,7 +79,7 @@ export default function BrandsPage() {
                                 ))}
                             </div>
 
-                            {brand.websiteUrl && (
+                            {brand.websiteUrl && isOpenLink(brand.websiteUrl) && (
                                 brand.websiteUrl.startsWith('/') ? (
                                     <Link href={brand.websiteUrl}
                                         className="mt-3 inline-flex items-center gap-1 text-xs hover:opacity-70 transition" style={{ color: "var(--tn-text-sub)" }}>
