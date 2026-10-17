@@ -24,6 +24,10 @@ export async function POST(req: Request) {
         }
     );
     const { data: { user } } = await supabase.auth.getUser();
+    // 로그인 회원만 (2026-10-18) - 전엔 누구나 보낼 수 있어 스팸·알림 메일 폭주가 가능했다
+    if (!user) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+    if (message.length > 2000) return NextResponse.json({ error: "too_long" }, { status: 400 });
+    const isPlanners = page_path?.startsWith("/planners") ?? false;
 
     const userAgent = req.headers.get("user-agent") || null;
 
@@ -32,8 +36,8 @@ export async function POST(req: Request) {
     const { data: inserted, error: insertErr } = await admin
         .from("myverse_feedback")
         .insert({
-            user_id: user?.id ?? null,
-            user_email: user?.email ?? null,
+            user_id: user.id,
+            user_email: user.email ?? null,
             message: message.trim(),
             user_agent: userAgent,
             page_path,
@@ -57,10 +61,10 @@ export async function POST(req: Request) {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                from: "Myverse AI <noreply@tenone.biz>",
+                from: isPlanners ? "Planner's <noreply@tenone.biz>" : "Myverse AI <noreply@tenone.biz>",
                 to: ["lools@tenone.biz"],
-                subject: "[Myverse AI 베타 피드백]",
-                text: `사용자: ${user?.email ?? "anonymous"}\n경로: ${page_path ?? "-"}\n\n${message.trim()}\n\n---\n인트라 인박스: https://intra.tenone.biz/intra/myverse/feedback${inserted?.id ? `?id=${inserted.id}` : ""}`,
+                subject: isPlanners ? "[Planner's 베타 의견]" : "[Myverse AI 베타 피드백]",
+                text: `사용자: ${user.email ?? "-"}\n경로: ${page_path ?? "-"}\n\n${message.trim()}\n\n---\n인트라 인박스: https://intra.tenone.biz/intra/planners/feedback${inserted?.id ? `?id=${inserted.id}` : ""}`,
             }),
         }).catch(() => {});
     }

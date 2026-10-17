@@ -8,6 +8,7 @@ import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
 import { LogoutButton, NotificationBell } from "@/components/AccountControls";
 import { AccountMenu } from "@/components/AccountMenu";
 import { APP_BASE, PLANNERS_APP_NAV, isAppNavActive } from "@/features/planners/app/nav";
+import { PlannersFeedbackButton } from "@/features/planners/app/PlannersFeedback";
 
 // 플래너'스 AI 앱 상단 바 (h-12 고정 — MyVerse 쉘의 pt-12와 짝). 구독·구매 링크 없음 (통신판매업 신고 전)
 export function PlannersAppTopBar() {
@@ -27,6 +28,8 @@ export function PlannersAppTopBar() {
                 </Link>
                 <Link href={`${APP_BASE}/daily`} className="text-lg font-bold leading-none text-teal-200 hover:text-white">AI</Link>
                 <div className="ml-auto flex items-center gap-1">
+                    {/* 베타: 함께 만드는 통로 (2026-10-18) - 첫 설정의 베타 편지가 여기를 가리킨다 */}
+                    <PlannersFeedbackButton />
                     <Link href={`${APP_BASE}/search`} className={iconCls(`${APP_BASE}/search`)} title="검색" aria-label="검색"><Search className="h-4 w-4" /></Link>
                     {/* 알림 = 유니버스 공통 알림(§1.9.2, lib/notify.ts) — 전엔 MyVerse 소셜 알림(흔적 하트·댓글) 화면으로 가 늘 비어 있었다 (2026-10-15 QA) */}
                     <span className="flex h-8 w-8 items-center justify-center"><NotificationBell /></span>

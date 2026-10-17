@@ -8,11 +8,12 @@ import type { MyverseMode, AiTone, MyverseRole } from "@/lib/myverse/types";
 import { MYVERSE_ROLE_META } from "@/lib/myverse/types";
 import { trackMyverse } from "@/lib/myverse/analytics";
 
-type Step = "welcome" | "role" | "ai" | "identity_lite" | "done";
+type Step = "letter" | "welcome" | "role" | "ai" | "identity_lite" | "done";
 
 // Planner's 앱: MyVerse '첫 흔적' 단계(개인 OS) 제외 — 정체성 단계에서 바로 시작 (2026-10-14)
 // '쓰는 방식'(mode) 단계는 뺐다 — Planner's 메뉴는 고정이라 골라도 달라지는 게 없었다 (2026-10-15 QA). 저장은 all_in_one
 const STEPS: Step[] = ["welcome", "role", "ai", "identity_lite"];
+// 처음 가입한 사람에게 먼저 베타 편지 한 장 (2026-10-18 사용자) - 진행 바에는 넣지 않는다. 의견은 앱 상단 '의견 보내기'(PlannersFeedback)
 
 const ROLE_ICONS: Record<MyverseRole, React.ElementType> = {
     office_worker: Briefcase,
@@ -30,7 +31,7 @@ const ROLE_ICONS: Record<MyverseRole, React.ElementType> = {
 export default function OnboardingPage() {
     const { isAuthenticated, isLoading } = useAuth();
 
-    const [step, setStep] = useState<Step>("welcome");
+    const [step, setStep] = useState<Step>("letter");
     const mode: MyverseMode = "all_in_one";
     const [role, setRole] = useState<MyverseRole | null>(null);
     const [morningTime] = useState("08:00");
@@ -120,7 +121,7 @@ export default function OnboardingPage() {
             />
 
             {/* 진행 바 */}
-            {step !== "welcome" && (
+            {step !== "welcome" && step !== "letter" && (
                 <div className="relative z-10 flex gap-1 px-6 pt-6">
                     {STEPS.slice(1).map((s, i) => {
                         const adjustedIndex = currentIndex - 1;
@@ -151,6 +152,55 @@ export default function OnboardingPage() {
             {/* 콘텐츠 */}
             <div className="relative z-10 flex-1 flex items-start justify-center px-6 pt-12 pb-16">
                 <div className="w-full max-w-xl">
+
+                    {/* ── LETTER (베타 · 함께 만들기) ── */}
+                    {step === "letter" && (
+                        <div className="min-h-[70vh] flex flex-col justify-between">
+                            <div className="space-y-8">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+                                    <span className="text-[11px] tracking-widest text-white/40">베타 · 함께 만드는 중</span>
+                                </div>
+
+                                <h1 className="text-3xl md:text-4xl font-light text-white leading-snug tracking-tight break-keep">
+                                    제대로 된 플래너를,<br />
+                                    같이 만들어 보려 합니다.
+                                </h1>
+
+                                <div className="space-y-5 text-white/55 text-[15px] leading-relaxed break-keep">
+                                    <p>
+                                        프랭클린 플래너를 비롯해 많은 플래너가 디지털로 넘어오려 했습니다.
+                                        그런데 대부분은 종이 한 장을 화면에 옮겨 놓는 데서 멈췄습니다.
+                                        종이처럼 손에 붙지도 않고, 앱처럼 나를 도와주지도 않았습니다.
+                                        그래서 많은 사람이 다시 종이로 돌아갔습니다.
+                                    </p>
+                                    <p>
+                                        플래너&apos;스 AI는 그 자리에서 다시 시작합니다.
+                                        밀린 일을 다시 옮겨 적지 않게, 손으로 쓴 것을 그대로 살리게, 하루를 혼자 돌아보지 않게.
+                                    </p>
+                                    <p>
+                                        지금은 베타입니다. 아직 서툰 곳이 있고, 매일 고치고 있습니다.
+                                        인공지능 기능은 베타 테스터부터 차례로 열고 있어요.
+                                    </p>
+                                    <p className="text-white/75">
+                                        쓰다가 불편했던 것, 있었으면 하는 것, 플래너&apos;스 AI가 틀린 순간을 알려 주세요.
+                                        앱 위쪽 &apos;의견 보내기&apos;로 보내 주시면 직접 읽고 다음 버전에 담겠습니다.
+                                    </p>
+                                    <p className="text-white/40 text-sm">플래너&apos;스 드림</p>
+                                </div>
+                            </div>
+
+                            <div className="mt-12">
+                                <button
+                                    onClick={() => setStep("welcome")}
+                                    className="group flex w-full items-center justify-between px-6 py-4 rounded-xl bg-[#0F766E] text-white text-sm font-medium transition-colors hover:bg-[#115E59]"
+                                >
+                                    <span>함께 만들어 보기</span>
+                                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     {/* ── WELCOME ── */}
                     {step === "welcome" && (
