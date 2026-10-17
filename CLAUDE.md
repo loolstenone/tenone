@@ -137,6 +137,8 @@ docs/              # 설계 문서
 
 ### 브랜드 Tier (2026-10-04 스냅샷)
 
+> **오픈 순서 (2026-10-17 사용자)**: 유니버스는 **하나씩 연다** - ① Planner's(베타) → ② MADLeague → 그 뒤 하나씩. 사용자에게 세계관을 말하지 않고, 쓰다 보니 넓은 세계였음을 알게 한다 (원칙 7). **차례가 오기 전 사이트는 `ums_sites.is_open=false`**(가림막·검색 차단, 직원은 그대로 봄) - 2026-10-17 HeRo·MADLeague·Badak(스테이징) 닫음. 열린 곳: TenOne · Planner's · RooK(기존 운영)
+
 > ⚠️ **서비스 체계(브랜드 구성·Tier·통합/분리)는 계속 바뀐다.** 원칙·데이터 계약은 특정 브랜드에 묶이지 않게 쓰고,
 > 현재 상태의 SSOT는 **DB `ums_sites`(tier·lifecycle·hosting)** + **`lib/domain-registry.ts` CANONICAL_HOSTS** 두 곳이다. 아래 표는 참고용 스냅샷.
 > 체계가 바뀌면: ① `ums_sites` 갱신(인트라 사이드바 집중/보관·사이트 현황은 자동 반영, §1.9.5) → ② CANONICAL_HOSTS 갱신 → ③ 이 표 갱신 → ④ 집중으로 올리면 `lib/brand-site-menus.ts` 등록. 서비스 통합·분리·이름 변경도 §0.1 종료 절차·이전 원칙을 그대로 적용한다
