@@ -17,6 +17,7 @@ const HISTORY_DATA = [...historyEvents]
         title: h.title,
         desc: h.description,
         link: h.link,
+        postId: h.postId,
     }));
 
 const years = ['전체', ...Array.from(new Set(HISTORY_DATA.map(h => h.year))).sort((a, b) => b.localeCompare(a))];
@@ -474,9 +475,12 @@ function AboutContent() {
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3">
-                                            <h3 className="font-bold tn-text">{item.title}</h3>
-                                            {item.link && (
-                                                <a href={item.link} target="_blank" rel="noopener noreferrer"
+                                            {/* 제목 = 이 사건을 기록한 Works 글 (lib/data.ts historyEvents.postId) */}
+                                            {item.postId
+                                                ? <Link href={`/works?postId=${item.postId}`} className="font-bold tn-text hover:underline underline-offset-4">{item.title}</Link>
+                                                : <h3 className="font-bold tn-text">{item.title}</h3>}
+                                            {item.link && isOpenLink(item.link) && (
+                                                <a href={item.link} target="_blank" rel="noopener noreferrer" aria-label={`${item.title} 사이트`}
                                                     className="tn-text-muted hover:tn-text transition-colors">
                                                     <ExternalLink className="h-3.5 w-3.5" />
                                                 </a>

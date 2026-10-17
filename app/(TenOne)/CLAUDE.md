@@ -81,7 +81,7 @@
 | `app/(TenOne)/profile/page.tsx` | 유니버스 프로필 (모든 서비스 현황) |
 | `app/(TenOne)/universe/page.tsx` · `brands/page.tsx` · `history/page.tsx` | About 탭으로 308 (2026-10-17 합침) |
 | `app/(TenOne)/about/page.tsx` | TenOne 소개 4탭 (2026-10-17 역할 정리): **Philosophy** = Ten:One™의 철학 · **Universe** = 세계관 철학(사람·돈·시간, 순환, 연결 방식 - 브랜드 목록 없음) · **Brands** = 세계관 안에서 만들어 가는 브랜드(역할 그룹 `lib/universe-map.ts` + 상태 운영 중·만드는 중·구상 = DB `ums_sites`, `useBrandStatus`) · **History** = 실행해 온 이야기. `?tab=` 동기화 |
-| `lib/data.ts` `historyEvents` | 연혁 SSOT — **Works에 글이 있는 사건만** (32건, 2026-10-05 재작성) |
+| `lib/data.ts` `historyEvents` | 연혁 SSOT — **공개(published) Works 글 1개 = 연혁 1줄** (32건). 항목마다 `postId`(Works 글) · 날짜 = 그 글 날짜 · About › History 제목을 누르면 그 Works 글로 (2026-10-18 맞춤: 보관 상태 LUKI 글 → 공개 글 'AI dol' 2026-03-24). Works 글을 공개·보관하면 여기도 같이 |
 | `app/(TenOne)/works/page.tsx` | Works 보드 (BoardPage 위임, `showWriteButton/showStats/showReactions=false`) — 글은 인트라 TenOne > Works에서 |
 | `app/(TenOne)/newsletter/page.tsx` | 뉴스레터 아카이브 |
 | `app/(TenOne)/contact/page.tsx` | 파트너·크루·프로젝트 의뢰 문의 (form_type `tenone_partner/crew/business`, Turnstile, 개인정보 동의, 첨부 10MB×3) |
