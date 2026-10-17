@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 
 /**
  * 사이트가 닫혀 있으면(is_open = false) 전체 화면 가림막을 표시합니다.
- * root layout에 배치. 마스터 계정(lools@tenone.biz)만 bypass.
+ * root layout에 배치. 직원(member_roles staff·manager·super_admin)은 통과 — 닫힌 사이트도 개발·관리할 수 있게 (2026-10-17, 전엔 마스터 이메일만)
  *
  * 인증 확인은 /api/auth/me (서버 쿠키 기반)를 사용하여
  * 크로스 서브도메인(*.tenone.biz) 세션을 올바르게 읽는다.
@@ -39,8 +39,8 @@ export function SiteClosedOverlay() {
             // 1. 서버 쿠키 기반 인증 확인 (크로스 서브도메인 지원)
             try {
                 const res = await fetch('/api/auth/me');
-                const { email } = await res.json();
-                if (email === 'lools@tenone.biz') {
+                const { staff } = await res.json();
+                if (staff === true) {
                     setChecked(true);
                     return;
                 }
