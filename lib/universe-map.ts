@@ -1,5 +1,5 @@
 // Ten:One™ Universe — 8 역할 그룹 SSOT
-// 랜딩(/) · about(/about?tab=universe) 등 본사이트 여러 곳에서 공유.
+// About › Brands(/about?tab=brands)에서 사용. 브랜드 상태(운영 중·만드는 중·구상)는 DB ums_sites에서 읽는다 (lib/use-open-sites.ts).
 // 새 브랜드 추가 시 이 파일만 수정하면 전 위치 반영.
 
 export interface UniverseBrand {
@@ -13,29 +13,28 @@ export interface UniverseRoleGroup {
     num: string;
     role: string;
     color: string;
+    /** 이 역할이 세계관 안에서 하는 일 (한두 문장) */
+    story: string;
     brands: ReadonlyArray<UniverseBrand>;
 }
 
 export const UNIVERSE_ROLE_GROUPS: ReadonlyArray<UniverseRoleGroup> = [
     {
-        num: "01", role: "철학 · 일하는 방법과 언어를 맞추는", color: "#C9B896",
+        num: "01", role: "철학 · 일하는 방법과 언어를 맞추는", color: "#C9B896", story: "모든 브랜드가 같은 철학과 같은 언어 위에 서 있게 합니다. 누가 하든 같은 방식으로 생각하고 실행합니다.",
         brands: [
             { name: "TenOne", kr: "텐원", desc: "Universe 설계자·운영자", href: "/" },
             { name: "Protocols", kr: "프로토콜", desc: "공통 언어 · Vrief · GPR" },
-            { name: "Dokdae", kr: "독대", desc: "AI Agent 1:1 채널" },
-            { name: "Intra", kr: "인트라", desc: "내부 관제 대시보드" },
-            { name: "AI Agent", kr: "에이전트 팀", desc: "자동 브리핑 운영 체계" },
         ]
     },
     {
-        num: "02", role: "일이 되게 하는", color: "#7BAE7F",
+        num: "02", role: "일이 되게 하는", color: "#7BAE7F", story: "IT와 사람, 두 바탕이 쌍으로 움직이며 모든 사업을 조용히 받칩니다.",
         brands: [
             { name: "WIO", kr: "Work In One", desc: "120+ 모듈 기업 운영 인프라", href: "/wio" },
             { name: "YouInOne", kr: "유인원", desc: "프로젝트 기획·실행", href: "/youinone" },
         ]
     },
     {
-        num: "03", role: "사람을 모으는", color: "#E8845C",
+        num: "03", role: "사람을 모으는", color: "#E8845C", story: "가장 넓은 입구입니다. 여기서 만난 사람들이 세계관 전체로 흘러갑니다.",
         brands: [
             { name: "MADLeague", kr: "매드리그", desc: "전국 대학생 프로젝트 연합", href: "/madleague" },
             { name: "MADLeap", kr: "매드립", desc: "실전 프로젝트 부트캠프", href: "/madleap" },
@@ -47,35 +46,35 @@ export const UNIVERSE_ROLE_GROUPS: ReadonlyArray<UniverseRoleGroup> = [
         ]
     },
     {
-        num: "04", role: "사람을 키우고 연결하는", color: "#D85A30",
+        num: "04", role: "사람을 키우고 연결하는", color: "#D85A30", story: "모인 사람을 키워 세상에 내보냅니다. 기획자를 기획자답게 만드는 도구와 교육입니다.",
         brands: [
             { name: "HeRo", kr: "히어로", desc: "데이터 기반 인재 발굴·매칭", href: "/hero" },
             { name: "Planner's", kr: "플래너'스", desc: "AI 시대 기획자 교육", href: "/planners" },
         ]
     },
     {
-        num: "05", role: "정보를 모으고 해석하는", color: "#5B8FB9",
+        num: "05", role: "정보를 모으고 해석하는", color: "#5B8FB9", story: "보이기 전에 먼저 발견하고 해석합니다. 발견한 것이 전략이 되고, 전략이 실행이 됩니다.",
         brands: [
             { name: "Mindle", kr: "마인들", desc: "트렌드 인텔리전스 엔진", href: "/mindle" },
         ]
     },
     {
-        num: "06", role: "문제를 풀고 가치를 만드는", color: "#BA7517",
+        num: "06", role: "문제를 풀고 가치를 만드는", color: "#BA7517", story: "트렌드와 전략, 브랜딩과 크리에이티브가 만나 기업과 사회의 실제 문제를 풉니다.",
         brands: [
             { name: "SmarComm", kr: "스마콤", desc: "AI 마케팅 자동화 솔루션", href: "/smarcomm" },
-            { name: "Brand Gravity", kr: "브랜드 그래비티", desc: "브랜딩 컨설팅" },
-            { name: "Naming Factory", kr: "네이밍 팩토리", desc: "세상에서 가장 짧은 전략" },
+            { name: "Brand Gravity", kr: "브랜드 그래비티", desc: "브랜딩 컨설팅", href: "/brandgravity" },
+            { name: "Naming Factory", kr: "네이밍 팩토리", desc: "세상에서 가장 짧은 전략", href: "/namingfactory" },
             { name: "RooK", kr: "루크", desc: "AI 크리에이터", href: "/rook" },
         ]
     },
     {
-        num: "07", role: "개인을 기록하는", color: "#9B7DD4",
+        num: "07", role: "개인을 기록하는", color: "#9B7DD4", story: "한 사람의 기록이 쌓여 그 사람의 세계가 됩니다.",
         brands: [
             { name: "Myverse", kr: "마이버스", desc: "개인 디지털 기록 보관", href: "/myverse" },
         ]
     },
     {
-        num: "08", role: "가능성을 키우는 — 인큐베이팅", color: "#888780",
+        num: "08", role: "가능성을 키우는", color: "#888780", story: "지금은 씨앗입니다. 조건이 맞으면 어떤 역할로도 자랄 수 있습니다.",
         brands: [
             { name: "MoNTZ", kr: "몬츠", desc: "AI 버추얼 아티스트 에이전시", href: "/montz" },
             { name: "Townity", kr: "타우니티", desc: "하이퍼로컬 커뮤니티", href: "/townity" },

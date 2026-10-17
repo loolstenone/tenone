@@ -79,10 +79,8 @@
 |------|------|
 | `app/page.tsx` | 랜딩 (Hero · Works · Core Values · CTA · Newsletter) — 2026-10-05 Crew CTA·세계관(Universe 8 그룹)·새로운 소식 섹션 삭제 |
 | `app/(TenOne)/profile/page.tsx` | 유니버스 프로필 (모든 서비스 현황) |
-| `app/(TenOne)/universe/page.tsx` | 유니버스 맵 (3대 자원·WIO/YIO·사업 포트폴리오·시너지 체인) |
-| `app/(TenOne)/brands/page.tsx` | 브랜드 갤러리 (전체 브랜드 카테고리 필터) |
-| `app/(TenOne)/about/page.tsx` | TenOne 소개 (Philosophy/Universe/Brands/History 4탭, `?tab=` 동기화, 탭 전환 시 탭 바 위치로 스크롤) |
-| `app/(TenOne)/history/page.tsx` | 별도 History 페이지 (lib/data.ts historyEvents) |
+| `app/(TenOne)/universe/page.tsx` · `brands/page.tsx` · `history/page.tsx` | About 탭으로 308 (2026-10-17 합침) |
+| `app/(TenOne)/about/page.tsx` | TenOne 소개 4탭 (2026-10-17 역할 정리): **Philosophy** = Ten:One™의 철학 · **Universe** = 세계관 철학(사람·돈·시간, 순환, 연결 방식 - 브랜드 목록 없음) · **Brands** = 세계관 안에서 만들어 가는 브랜드(역할 그룹 `lib/universe-map.ts` + 상태 운영 중·만드는 중·구상 = DB `ums_sites`, `useBrandStatus`) · **History** = 실행해 온 이야기. `?tab=` 동기화 |
 | `lib/data.ts` `historyEvents` | 연혁 SSOT — **Works에 글이 있는 사건만** (32건, 2026-10-05 재작성) |
 | `app/(TenOne)/works/page.tsx` | Works 보드 (BoardPage 위임, `showWriteButton/showStats/showReactions=false`) — 글은 인트라 TenOne > Works에서 |
 | `app/(TenOne)/newsletter/page.tsx` | 뉴스레터 아카이브 |

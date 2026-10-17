@@ -115,14 +115,12 @@ export const siteConfigs: Record<SiteIdentifier, SiteConfig> = {
         authMethods: { email: true, google: true, kakao: true },
         nav: [
             { name: 'About', href: '/about' },
-            { name: 'Universe', href: '/universe' },
-            { name: 'Brands', href: '/brands' },
             { name: 'Works', href: '/works' },
             { name: 'Contact', href: '/contact' },
         ],
         footerLinks: [
             { name: 'About', href: '/about' },
-            { name: 'Universe', href: '/universe' },
+            { name: 'Universe', href: '/about?tab=universe' },
             { name: 'Contact', href: '/contact' },
         ],
         tagline: 'Beyond the Limit. 가치로 연결된 멀티 브랜드 생태계.',
