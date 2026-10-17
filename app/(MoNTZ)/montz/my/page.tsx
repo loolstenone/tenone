@@ -1,5 +1,6 @@
 "use client";
 
+import { useSignOut } from "@/lib/sign-out";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -43,7 +44,8 @@ const APP_STATUS_STYLE: Record<MontzApplication["status"], string> = {
 };
 
 export default function MoNTZMyPage() {
-    const { user, isAuthenticated, isLoading, logout } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
+    const signOut = useSignOut();
     const router = useRouter();
     const [myPosts, setMyPosts] = useState<MyPost[]>([]);
     const [activeTab, setActiveTab] = useState<TabId>("works");
@@ -296,7 +298,7 @@ export default function MoNTZMyPage() {
                 )}
                 {activeTab === "settings" && (
                     <div className="space-y-4">
-                        <button onClick={() => { logout(); router.push("/"); }}
+                        <button onClick={signOut}
                             className="w-full flex items-center gap-3 p-4 rounded-lg bg-neutral-800 text-red-400 hover:opacity-80 transition-opacity">
                             <LogOut className="h-5 w-5" /><span className="text-sm">로그아웃</span>
                         </button>

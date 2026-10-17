@@ -1,5 +1,6 @@
 "use client";
 
+import { useSignOut } from "@/lib/sign-out";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginRequired } from "@/components/LoginRequired";
@@ -25,7 +26,8 @@ interface MyPost {
 }
 
 export default function MyPage() {
-    const { user, isAuthenticated, isLoading, logout } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
+    const signOut = useSignOut();
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<"posts" | "bookmarks" | "settings">("posts");
     const [myPosts, setMyPosts] = useState<MyPost[]>([]);
@@ -143,7 +145,7 @@ export default function MyPage() {
                             </div>
                             <ChevronRight className="h-4 w-4" style={{ color: "var(--tn-text-muted)" }} />
                         </CrossSiteLink>
-                        <button onClick={() => { logout(); router.push("/"); }}
+                        <button onClick={signOut}
                             className="w-full flex items-center gap-3 p-4 rounded-lg text-red-500 transition-colors hover:opacity-80"
                             style={{ backgroundColor: "var(--tn-bg-alt)" }}>
                             <LogOut className="h-5 w-5" />

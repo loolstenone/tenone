@@ -5,12 +5,14 @@ import { Menu, X, LogOut, ChevronDown, Share2, Search } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { useSignOut } from "@/lib/sign-out";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const currentPath = usePathname();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const signOut = useSignOut();
   const profileRef = useRef<HTMLDivElement>(null);
   const [shareToast, setShareToast] = useState(false);
 
@@ -36,7 +38,7 @@ export default function Header() {
   }, []);
 
   const handleLogout = async () => {
-    await logout();
+    await signOut();
   };
 
   const initial = (user?.email || user?.name || '?').charAt(0).toUpperCase();

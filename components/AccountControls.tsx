@@ -11,6 +11,7 @@ import Image from "next/image";
 import { Bell, User } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { CrossSiteLink } from "@/components/CrossSiteLink";
+import { useSignOut } from "@/lib/sign-out";
 
 interface NotificationItem { id: string; title: string; body?: string; href?: string; created_at: string; read?: boolean; }
 
@@ -116,13 +117,9 @@ export function AccountAvatar() {
  * 로그아웃 + 화면 다시 그리기 — 서버에서 로그인 여부를 판단하는 화면(Planner's 앱·SmarComm 대시보드·WIO 앱 등)은
  * 브라우저 세션만 지우면 로그인 화면으로 바뀌지 않고 그대로 남는다 (2026-10-15 Planner's 앱 모바일에서 로그아웃 후에도 계정 메뉴가 남음)
  */
+/** 직접 로그아웃 — 회원 전용 화면이면 서비스 첫 화면으로, 공개 화면이면 그 자리 (lib/sign-out.ts) */
 export function useLogoutAndRefresh() {
-    const { logout } = useAuth();
-    const router = useRouter();
-    return useCallback(async () => {
-        await logout();
-        router.refresh();
-    }, [logout, router]);
+    return useSignOut();
 }
 
 export function LogoutButton({ onLogout }: { onLogout?: () => void | Promise<void> }) {

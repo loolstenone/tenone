@@ -10,13 +10,15 @@ import { MyProfileCard } from "@/components/MyProfileCard";
 import { CapabilitySection } from "@/components/CapabilitySection";
 import { useRouter } from "next/navigation";
 import { FileText, Bookmark, Settings, LogOut, ChevronRight, Eye } from "lucide-react";
+import { useSignOut } from "@/lib/sign-out";
 
 interface MyPost {
     id: string; board: string; title: string; view_count: number; comment_count: number; created_at: string;
 }
 
 export function MyverseProfileView({ dark = true, fullPage = true }: { dark?: boolean; fullPage?: boolean }) {
-    const { user, isAuthenticated, isLoading, logout } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
+    const signOut = useSignOut();
     const router = useRouter();
     const [myPosts, setMyPosts] = useState<MyPost[]>([]);
     const [activeTab, setActiveTab] = useState<"posts" | "bookmarks" | "settings">("posts");
@@ -92,7 +94,7 @@ export function MyverseProfileView({ dark = true, fullPage = true }: { dark?: bo
                 )}
                 {activeTab === "settings" && (
                     <div className="space-y-4">
-                        <button onClick={() => { logout(); router.push("/"); }}
+                        <button onClick={signOut}
                             className={`w-full flex items-center gap-3 p-4 rounded-lg ${settingsBg} text-red-500 hover:opacity-80 transition-opacity`}>
                             <LogOut className="h-5 w-5" /><span className="text-sm">로그아웃</span>
                         </button>

@@ -13,6 +13,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { CANONICAL_HOSTS, domainSiteMap } from '@/lib/domain-registry';
 import { BRAND_SITE_MENUS } from '@/lib/brand-site-menus';
+import { PRIVATE_PATHS, COMMON_PRIVATE } from '@/lib/private-paths';
 
 export interface SiteSeoSettings {
     is_open: boolean | null;
@@ -31,14 +32,7 @@ export interface HostSite {
     reason?: string;
 }
 
-/** 브랜드별 사이트맵에서 빼는 경로 — 로그인·회원 전용 화면 (접두사 일치) */
-const PRIVATE_PATHS: Record<string, string[]> = {
-    madleague: ['/madleague/pt', '/madleague/community', '/madleague/arena', '/madleague/projects', '/madleague/member', '/madleague/my', '/madleague/madzine/write', '/madleague/madzine/contest/write'],
-    rook: ['/rook/my'],
-    hero: ['/hero/my', '/hero/app'],
-    planners: ['/planners/app', '/planners/my'],
-};
-const COMMON_PRIVATE = ['/my', '/intra', '/api', '/login', '/signup'];
+// 사이트맵에서 빼는 회원 전용 경로 = lib/private-paths.ts (로그아웃 이동과 같은 목록)
 /** 메뉴 레지스트리에 없는 공개 페이지 — 홈(로고)·About(유틸리티바) */
 const EXTRA_PATHS: Record<string, string[]> = {
     madleague: ['/madleague/about'],

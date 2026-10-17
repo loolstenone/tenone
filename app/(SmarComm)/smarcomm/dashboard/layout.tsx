@@ -15,6 +15,7 @@ import { SMARCOMM_BETA_EMAILS } from '@/lib/api-access-policy';
 import { getSetting } from '@/lib/supabase/settings';
 import TierGate from '@/features/smarcomm/TierGate';
 import { getRequiredTier } from '@/lib/smarcomm/tier-policy';
+import { useSignOut } from "@/lib/sign-out";
 
 // SmarComm CLAUDE.md § 1A 라우트 노출 정책 (2026-05-19):
 // Marvis 런칭 시점에 /smarcomm/dashboard/* (Pro 자산)은 비공개.
@@ -46,7 +47,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const pathname = usePathname();
   const showMockBanner = isMockPath(pathname);
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const signOut = useSignOut();
   const [ready, setReady] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [companyLogo, setCompanyLogo] = useState('');
@@ -126,10 +128,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const sidebarWidth = collapsed ? 56 : 224;
 
-  const handleLogout = async () => {
-    await logout();
-    router.push('/');
-  };
+  const handleLogout = signOut;
 
   return (
     <SidebarContext.Provider value={{ collapsed, setCollapsed }}>

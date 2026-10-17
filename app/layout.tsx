@@ -10,6 +10,7 @@ import { BrandJoinGate } from "@/components/BrandJoinGate";
 import { AuthRecoveryHandler } from "@/components/AuthRecoveryHandler";
 import { Analytics } from "@/components/Analytics";
 import "./globals.css";
+import { SignedOutNotice } from "@/components/SignedOutNotice";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -93,6 +94,7 @@ export default function RootLayout({
               <SiteClosedOverlay />
               <AuthRecoveryHandler />
               <ConsentGate />
+              <SignedOutNotice />
               <BrandJoinGate />
               {children}
             </IdentityProvider>

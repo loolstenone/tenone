@@ -8,6 +8,7 @@ import { CHART_PALETTES, getChartPalette, setChartPalette, loadChartPaletteFromD
 import { getSetting, setSetting } from '@/lib/supabase/settings';
 import PageTopBar from '@/features/smarcomm/PageTopBar';
 import GuideHelpButton from '@/features/smarcomm/GuideHelpButton';
+import { useSignOut } from "@/lib/sign-out";
 
 type SettingsTab = 'workspace' | 'members' | 'palette' | 'plan' | 'integrations';
 
@@ -23,7 +24,8 @@ export default function ProfilePage() {
   const [selectedPalette, setSelectedPalette] = useState('mono');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('viewer');
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const signOut = useSignOut();
 
   useEffect(() => {
     getSetting<{ name?: string; industry?: string; siteUrl?: string; goal?: string }>('smarcomm', 'company', 'smarcomm_company').then(data => {
@@ -44,7 +46,7 @@ export default function ProfilePage() {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleLogout = async () => { await logout(); router.push('/'); };
+  const handleLogout = signOut;
 
   const inputClass = "w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-text placeholder:text-text-muted focus:border-text focus:outline-none";
 

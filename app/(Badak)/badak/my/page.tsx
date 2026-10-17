@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { MyProfileCard } from '@/components/MyProfileCard';
 import { CapabilitySection } from '@/components/CapabilitySection';
+import { useSignOut } from "@/lib/sign-out";
 
 type TabType = 'mygroups' | 'posts' | 'bookmarks' | 'connections' | 'talks' | 'needs' | 'notifications' | 'settings';
 type ApplicantStatus = 'applied' | 'approved' | 'rejected';
@@ -1107,7 +1108,8 @@ function ProfileBoostCard({
 
 // ── 메인 페이지 ──
 function BadakMyPageInner() {
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const signOut = useSignOut();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabType>(() => {
@@ -2349,7 +2351,7 @@ function BadakMyPageInner() {
             )}
 
             <button
-              onClick={() => { logout(); router.push('/badak'); }}
+              onClick={signOut}
               className="flex w-full items-center gap-2 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3.5 text-xs text-red-400/70 hover:bg-white/[0.06]"
             >
               <LogOut className="h-4 w-4" /> 로그아웃

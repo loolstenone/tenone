@@ -1094,6 +1094,13 @@ export const ACTION_HUB_REGISTRY: ActionEntry[] = [
 로그아웃                         ← 모바일 시트에만 (데스크톱은 바에 텍스트)
 ```
 
+### 로그아웃 후 (2026-10-17)
+
+- **직접 로그아웃** = `useSignOut()` 하나 (`lib/sign-out.ts`, `AccountControls`의 `useLogoutAndRefresh`도 같은 것). 회원 전용 화면(`lib/private-paths.ts` — 서비스 앱·마이 페이지·계정 관리)이면 **그 서비스 공개 첫 화면으로 이동**(Planner's 앱 → Planner's 홈, 새로 불러오기 + 뒤로 가기 안 됨), 공개 화면이면 그 자리. 로그인 창은 띄우지 않고 "로그아웃되었습니다" 안내만 (`SignedOutNotice`)
+- **저절로 풀림**(세션 만료·다른 탭 로그아웃) = 그 자리에서 `<LoginRequired>` 로그인 창 → 로그인하면 하던 작업으로
+- 회원 전용 화면 목록은 사이트맵 제외 목록과 같은 파일 하나 (`PRIVATE_PATHS`) — 새 서비스 앱 경로를 만들면 여기에 추가
+- ❌ 로그아웃 버튼에서 `logout()` + `router.push('/')` 직접 호출 (tenone.biz 경로 방식에서 다른 사이트로 튕겨 나가고, 회원 전용 화면이면 로그인 창이 뜬다)
+
 ### 화면 크기
 
 유틸리티바가 **데스크톱·모바일을 스스로 그린다**. `breakpoint`(md·lg·xl)를 헤더 메뉴가 펼쳐지는 너비와 맞춘다.

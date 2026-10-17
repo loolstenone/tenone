@@ -15,6 +15,7 @@ import { createClient } from "@/lib/supabase/client";
 import { BrandProfilePanel } from "@/components/profile/BrandProfilePanel";
 import { BRAND_PROFILES } from "@/lib/profile/brand-profiles";
 import { MadProfileSection, type MadSection } from "@/features/madleague/MadProfileSection";
+import { useSignOut } from "@/lib/sign-out";
 
 interface MadMemberInfo {
     role: string;
@@ -26,7 +27,8 @@ interface MadMemberInfo {
 }
 
 export default function MadLeagueMyPage() {
-    const { user, isAuthenticated, isLoading, logout } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
+    const signOut = useSignOut();
     const router = useRouter();
     const [madInfo, setMadInfo] = useState<MadMemberInfo | null>(null);
     const [madStatus, setMadStatus] = useState<'loading' | 'none' | 'pending' | 'active'>('loading');
@@ -249,7 +251,7 @@ export default function MadLeagueMyPage() {
 
                 {/* 로그아웃 */}
                 <button
-                    onClick={() => { logout(); router.push('/'); }}
+                    onClick={signOut}
                     className="w-full flex items-center gap-3 px-6 py-4 bg-neutral-950 border border-neutral-800 text-red-400 hover:bg-neutral-900 transition text-sm"
                 >
                     <LogOut className="h-4 w-4" /> 로그아웃

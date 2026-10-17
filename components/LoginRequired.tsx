@@ -4,6 +4,7 @@ import { useState } from "react";
 import { LogIn } from "lucide-react";
 import { LoginModal } from "@/components/LoginModal";
 import { useAuth } from "@/lib/auth-context";
+import { isLeavingAfterSignOut } from "@/lib/sign-out";
 
 /**
  * 로그인이 필요한 화면 표준 (CLAUDE.md §1.2.1 원칙 A) — 현재 페이지 위에 LoginModal을 바로 띄운다.
@@ -25,6 +26,8 @@ export function LoginRequired({ accentColor = "#171717", defaultTab = "login", m
 }) {
     const [open, setOpen] = useState(true);
     const { pendingSignup } = useAuth();
+    // 직접 로그아웃하고 서비스 첫 화면으로 떠나는 중이면 로그인 창을 띄우지 않는다 (lib/sign-out.ts)
+    if (isLeavingAfterSignOut()) return <div className="min-h-[60vh]" />;
     return (
         <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center">
             <p className="text-sm text-neutral-500">{message}</p>

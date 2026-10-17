@@ -1,5 +1,6 @@
 "use client";
 
+import { useSignOut } from "@/lib/sign-out";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { LoginModal } from "@/components/LoginModal";
@@ -24,7 +25,8 @@ interface MyPost {
 }
 
 export default function JakkaMyPage() {
-    const { user, isAuthenticated, isLoading, logout } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
+    const signOut = useSignOut();
     const router = useRouter();
     const [myPosts, setMyPosts] = useState<MyPost[]>([]);
     const [creator, setCreator] = useState<JakkaCreator | null>(null);
@@ -232,7 +234,7 @@ export default function JakkaMyPage() {
                 )}
                 {activeTab === "settings" && (
                     <div className="space-y-4">
-                        <button onClick={() => { logout(); router.push("/"); }}
+                        <button onClick={signOut}
                             className="w-full flex items-center gap-3 p-4 rounded-lg bg-neutral-800 text-red-400 hover:opacity-80 transition-opacity">
                             <LogOut className="h-5 w-5" /><span className="text-sm">로그아웃</span>
                         </button>

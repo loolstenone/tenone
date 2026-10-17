@@ -10,9 +10,9 @@ import {
     Bell, ChevronDown, LogOut, User as UserIcon,
 } from "lucide-react";
 import type { SubscriptionStatus, CustomMenuKey } from "@/lib/myverse/types";
-import { useAuth } from "@/lib/auth-context";
 import { InstallButton } from "./InstallButton";
 import { UniverseMobileMenu } from "@/components/UniverseMobileMenu";
+import { useSignOut } from "@/lib/sign-out";
 
 const BASE = "/myverse/app";
 
@@ -74,7 +74,7 @@ export function AppTopNav({
     customMenus?: CustomMenuKey[];
 }) {
     const pathname = usePathname();
-    const { logout } = useAuth();
+    const signOut = useSignOut();
     const [menuOpen, setMenuOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [unread, setUnread] = useState(0);
@@ -284,7 +284,7 @@ export function AppTopNav({
                                 <div className="border-t border-neutral-100 myverse-dark:border-white/8 py-1">
                                     <button
                                         type="button"
-                                        onClick={() => { setAvatarMenuOpen(false); logout(); }}
+                                        onClick={() => { setAvatarMenuOpen(false); void signOut(); }}
                                         className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-neutral-50 myverse-dark:hover:bg-white/5 transition-colors w-full text-left text-neutral-700 myverse-dark:text-neutral-200"
                                     >
                                         <LogOut className="h-4 w-4 text-neutral-400" />
