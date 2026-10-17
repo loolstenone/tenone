@@ -4,15 +4,13 @@ import { PLANNERS_SECTION, PlannersSectionTitle } from "@/features/planners/Page
 import { ArrowRight } from "lucide-react";
 import { ProgramBoard } from "@/features/programs/ProgramBoard";
 import { PROGRAM_THEMES } from "@/features/programs/ProgramTheme";
-import { ProductGrid } from "@/features/planners/pad/ProductCard";
-import { listPlannersFiles, PAD_CATEGORIES, padPath, sortFiles } from "@/lib/planners/library";
-import { reviewCountsByFile } from "@/lib/planners/reviews";
-import { listActiveBanners, listActiveShowcases } from "@/lib/planners/home";
+import { listPlannersFiles, padPath, sortFiles } from "@/lib/planners/library";
+import { listActiveBanners } from "@/lib/planners/home";
 import { HeroCarousel, type HeroSlide } from "@/features/planners/home/HeroCarousel";
 import { AiAtWork } from "@/features/planners/home/AiAtWork";
 
 // 첫 화면 (2026-10-14 AI 중심 개편, 사용자 "기획자를 전면에 내세우면 재미가 없다")
-// 순서 = ① 플래너'스 AI(주인공) → ② 플래너'스 PAD(손글씨, 진열대·분류) → ③ 기획자 과정(부수, "우리는 모두 기획자다 / 자기 인생에서만큼은")
+// 순서 = ① 플래너'스 AI(주인공) → ② 플래너'스 PAD(소개 한 칸만 — 진열대·분류는 PAD 화면에, 2026-10-17 사용자 "AI 7 : PAD 3") → ③ 기획자 과정(부수, "우리는 모두 기획자다 / 자기 인생에서만큼은")
 // ❌ 첫 장에 앱 열기 버튼을 두지 않는다 (앱 입구 = 유틸리티바 '내 플래너')
 export const metadata: Metadata = {
     title: { absolute: "플래너'스 AI · 내 손으로, 내 뜻대로" },
@@ -29,11 +27,9 @@ const AI_VERBS = [
 
 export default async function PlannersHome() {
     const files = await listPlannersFiles();
-    const reviewCounts = await reviewCountsByFile();
     const popular = sortFiles(files.filter((f) => f.kind === "template"), "popular").slice(0, 8);
-    const tiles = PAD_CATEGORIES.map((c) => ({ c, list: files.filter((f) => f.category === c) })).filter((t) => t.list.length > 0);
     const t = { ...PROGRAM_THEMES.planners, accent: "#0F766E" };
-    const [banners, showcases] = await Promise.all([listActiveBanners(), listActiveShowcases(files)]);
+    const banners = await listActiveBanners();
 
     // 첫 화면 슬라이드 (2026-10-14 사용자): 첫 장 = "우리는 모두 기획자다 / 자기 인생에서만큼은" → 플래너'스 AI 후킹 카피 4장 → 인트라 › Planner's › 배너
     // 버튼은 전 장 같은 두 개 — 플래너'스 AI(강조) · 플래너'스 PAD (사용자 지정 전체 이름)
@@ -138,34 +134,6 @@ export default async function PlannersHome() {
                             <Link key={f.id} href={padPath(f.id)} className="block bg-white p-4">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={f.thumbnail_url} alt={f.title} className="aspect-square w-full object-contain" />
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* 진열대 — 인트라 › Planner's › 진열대 (아임웹 쇼핑 기획전 자리) */}
-            {showcases.map((sc, k) => (
-                <Shelf key={sc.id} title={sc.title} description={sc.description} href="/planners/pad">
-                    <ProductGrid reviewCounts={reviewCounts} files={sc.files} priorityCount={k === 0 ? 4 : 0} />
-                </Shelf>
-            ))}
-
-            {/* 분류 */}
-            <section className="bg-neutral-50">
-                <div className={PLANNERS_SECTION}>
-                    <PlannersSectionTitle title="분류별로 찾기" description="연간 플래너부터 노트·프레임워크·플레이 서식까지" href="/planners/pad" />
-                    <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:gap-6 lg:grid-cols-5">
-                        {tiles.map(({ c, list }) => (
-                            <Link key={c} href={`/planners/pad?c=${encodeURIComponent(c)}`} className="group flex items-center gap-5 bg-white p-6 md:p-7 transition-shadow hover:shadow-md">
-                                {list[0].thumbnail_url && (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={list[0].thumbnail_url} alt="" className="h-16 w-16 shrink-0 object-contain" />
-                                )}
-                                <span>
-                                    <span className="block text-sm font-bold group-hover:text-[#0F766E]">{c}</span>
-                                    <span className="text-xs text-neutral-400">{list.length}종</span>
-                                </span>
                             </Link>
                         ))}
                     </div>

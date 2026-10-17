@@ -4,6 +4,7 @@ import { ProductCard } from "@/features/planners/pad/ProductCard";
 import { ProgressiveProductGrid } from "@/features/planners/pad/ProgressiveProductGrid";
 import { listPlannersFiles, PAD_CATEGORIES, PAD_CATEGORY_DESC, sortFiles, type PadSort } from "@/lib/planners/library";
 import { reviewCountsByFile } from "@/lib/planners/reviews";
+import { listActiveShowcases } from "@/lib/planners/home";
 import { PlannersPageHero, PLANNERS_CONTAINER, PLANNERS_SECTION } from "@/features/planners/PageHero";
 
 // 플래너'스 PAD (곁들임 제품, 2026-10-14 AI 중심 개편) — 굿노트·삼성노트·XODO 손글씨 플래너 몰 (바닥상회에서 옮겨 옴, 원천 planners_files)
@@ -21,18 +22,13 @@ const SORTS: { key: PadSort; label: string }[] = [
 export default async function PlannersPadPage({ searchParams }: { searchParams: Promise<{ c?: string; sort?: string }> }) {
     const { c, sort: sortParam } = await searchParams;
     const all = await listPlannersFiles();
-    const reviewCounts = await reviewCountsByFile();
+    const [reviewCounts, showcases] = await Promise.all([reviewCountsByFile(), listActiveShowcases(all)]);
     const category = c && (PAD_CATEGORIES as readonly string[]).includes(c) ? c : null;
     const sort: PadSort = sortParam === "new" || sortParam === "name" ? sortParam : "popular";
     const files = sortFiles(category ? all.filter((f) => f.category === category) : all, sort);
     const counts = new Map<string, number>();
     for (const f of all) counts.set(f.category, (counts.get(f.category) ?? 0) + 1);
     const reviewCountsObj = Object.fromEntries(reviewCounts);
-    const sections = category ? [] : PAD_CATEGORIES.filter((cat) => counts.get(cat)).map((cat) => ({
-        cat,
-        items: sortFiles(all.filter((f) => f.category === cat), "popular").slice(0, 4),
-        total: counts.get(cat) ?? 0,
-    }));
 
     const href = (next: { c?: string | null; sort?: PadSort }) => {
         const p = new URLSearchParams();
@@ -43,6 +39,14 @@ export default async function PlannersPadPage({ searchParams }: { searchParams: 
         const qs = p.toString();
         return `/planners/pad${qs ? `?${qs}` : ""}`;
     };
+    // 전체 = 진열대(인트라 › Planner's › 진열대) → 분류별 섹션(인기 4개 + 전체 보기)
+    const sections: { key: string; title: string; desc?: string | null; items: typeof all; total: number; more: string | null }[] = category ? [] : [
+        ...showcases.map((sc) => ({ key: sc.id, title: sc.title, desc: sc.description, items: sc.files, total: sc.files.length, more: null })),
+        ...PAD_CATEGORIES.filter((cat) => counts.get(cat)).map((cat) => {
+            const total = counts.get(cat) ?? 0;
+            return { key: cat, title: cat, desc: PAD_CATEGORY_DESC[cat], items: sortFiles(all.filter((f) => f.category === cat), "popular").slice(0, 4), total, more: total > 4 ? href({ c: cat, sort: "popular" }) : null };
+        }),
+    ];
 
     return (
         <>
@@ -81,18 +85,16 @@ export default async function PlannersPadPage({ searchParams }: { searchParams: 
                         : <ProgressiveProductGrid files={files} reviewCounts={reviewCountsObj} />}
                 </section>
             ) : (
-                // 전체 = 분류별 섹션 (바닥상회 모음전 방식) — 분류마다 인기 4개 + 전체 보기
+                // 전체 = 진열대 + 분류별 섹션 (바닥상회 모음전 방식)
                 <div className={PLANNERS_SECTION}>
-                    {sections.map(({ cat, items, total }, i) => (
-                        <section key={cat} className={i > 0 ? "mt-20 border-t border-neutral-200 pt-12 md:mt-28 md:pt-16" : ""} aria-labelledby={`pad-${i}`}>
+                    {sections.map(({ key, title, desc, items, total, more }, i) => (
+                        <section key={key} className={i > 0 ? "mt-20 border-t border-neutral-200 pt-12 md:mt-28 md:pt-16" : ""} aria-labelledby={`pad-${i}`}>
                             <div className="mb-6 flex items-end justify-between gap-4 md:mb-8">
                                 <div className="min-w-0">
-                                    <h2 id={`pad-${i}`} className="text-xl font-bold md:text-2xl">{cat} <span className="text-base font-normal text-neutral-400">{total}</span></h2>
-                                    {PAD_CATEGORY_DESC[cat] && <p className="mt-1 break-keep text-sm text-neutral-500">{PAD_CATEGORY_DESC[cat]}</p>}
+                                    <h2 id={`pad-${i}`} className="text-xl font-bold md:text-2xl">{title} <span className="text-base font-normal text-neutral-400">{total}</span></h2>
+                                    {desc && <p className="mt-1 break-keep text-sm text-neutral-500">{desc}</p>}
                                 </div>
-                                {total > items.length && (
-                                    <Link href={href({ c: cat, sort: "popular" })} className="shrink-0 text-sm text-neutral-500 hover:text-[#0F766E]">전체 보기 ›</Link>
-                                )}
+                                {more && <Link href={more} className="shrink-0 text-sm text-neutral-500 hover:text-[#0F766E]">전체 보기 ›</Link>}
                             </div>
                             {/* 모바일은 옆으로 넘기고, 큰 화면은 한 줄 4개 */}
                             <div className="-mx-6 flex snap-x snap-mandatory scroll-px-6 gap-5 overflow-x-auto px-6 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-4 md:gap-x-10 md:overflow-visible md:px-0">

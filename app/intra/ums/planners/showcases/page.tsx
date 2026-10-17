@@ -8,7 +8,7 @@ import { adminTitle } from "@/lib/brand-site-menus";
 import { plannersApi } from "@/features/planners/admin/upload";
 import { homeApi, fromLocalInput, liveState, toLocalInput } from "@/features/planners/admin/homeApi";
 
-// Planner's › 진열대 — 첫 화면 상품 진열대 (아임웹 '쇼핑 기획전' 자리). 상품은 플래너'스 PAD에서 골라 순서대로
+// Planner's › 진열대 — 플래너'스 PAD 화면 맨 위 상품 진열대 (2026-10-17 첫 화면에서 옮김) (아임웹 '쇼핑 기획전' 자리). 상품은 플래너'스 PAD에서 골라 순서대로
 interface Showcase { id: string; title: string; description: string | null; file_ids: string[]; sort_order: number; is_published: boolean; starts_at: string | null; ends_at: string | null }
 interface Product { id: string; title: string; category: string; thumbnail_url: string | null; is_published: boolean }
 
@@ -36,9 +36,9 @@ export default function PlannersShowcasesAdmin() {
 
     return (
         <div className="max-w-5xl">
-            <PageHeader title={adminTitle("/intra/ums/planners/showcases", "진열대")} description="첫 화면 진열대 — 두 제품 소개 아래에 이 순서대로 나옵니다. 상품은 최대 24개, 비공개 상품은 사이트에서 건너뜁니다.">
+            <PageHeader title={adminTitle("/intra/ums/planners/showcases", "진열대")} description="플래너'스 PAD 진열대 — PAD 화면 전체 보기 맨 위, 분류별 섹션보다 먼저 이 순서대로 나옵니다. 상품은 최대 24개, 비공개 상품은 사이트에서 건너뜁니다.">
                 <div className="flex items-center gap-3">
-                    <a href={brandSiteUrl("planners", "/planners")} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-neutral-700"><ExternalLink className="h-3.5 w-3.5" /> 첫 화면 보기</a>
+                    <a href={brandSiteUrl("planners", "/planners/pad")} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-neutral-700"><ExternalLink className="h-3.5 w-3.5" /> PAD 화면 보기</a>
                     <button onClick={add} className="inline-flex items-center gap-1.5 bg-neutral-900 px-3 py-2 text-sm font-medium text-white"><Plus className="h-4 w-4" /> 진열대 추가</button>
                 </div>
             </PageHeader>

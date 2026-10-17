@@ -78,7 +78,7 @@ export const BRAND_SITE_MENUS: BrandSiteMenus[] = [
         adminBase: "/intra/ums/planners",
         menus: [
             { placement: "feature", location: "홈", label: "배너", path: "/planners", source: { kind: "table", table: "planners_banners" }, adminHref: "/intra/ums/planners/banners", unit: "개" },
-            { placement: "feature", location: "홈", label: "진열대", path: "/planners", source: { kind: "table", table: "planners_showcases" }, adminHref: "/intra/ums/planners/showcases", unit: "개" },
+            { placement: "feature", location: "플래너'스 PAD", label: "진열대", path: "/planners/pad", source: { kind: "table", table: "planners_showcases" }, adminHref: "/intra/ums/planners/showcases", unit: "개" },
             { placement: "header", label: "플래너'스 AI", path: "/planners/ai", source: { kind: "static" } },
             { placement: "header", label: "플래너'스 PAD", path: "/planners/pad", source: { kind: "table", table: "planners_files", eq: { kind: "planner" } }, adminHref: "/intra/ums/planners/pad", unit: "개" },
             { placement: "feature", location: "플래너'스 PAD", label: "템플릿", path: "/planners/pad", source: { kind: "table", table: "planners_files", eq: { kind: "template" } }, adminHref: "/intra/ums/planners/pad", unit: "개" },
