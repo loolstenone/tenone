@@ -117,7 +117,8 @@ function AboutContent() {
                                     얼마나 될까?
                                 </h2>
                                 <p className="mt-8 tn-text-sub leading-relaxed">
-                                    PC통신 시절부터 쓰던 ID &apos;lools&apos;, 전화번호 끝자리 1001, 무언가 특별한 일을 하고 싶었던 10월 1일, 시계를 볼 때마다 자주 마주친 10시 01분.
+                                    PC통신 시절부터 쓰던 ID &apos;lools&apos;, 전화번호 끝자리 1001, 시계를 볼 때마다 자주 마주친 10시 01분.
+                                    이런 우연들이 쌓여 10월 1일에는 무언가 특별한 일을 하고 싶었습니다.
                                     반복되는 우연은 그저 우연이 아니라, 마치 계획된 우연처럼 지금의 나를 만들었습니다.
                                 </p>
                                 <p className="mt-4 tn-text-sub leading-relaxed">
